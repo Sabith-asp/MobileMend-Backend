@@ -1,0 +1,486 @@
+[
+  {
+    "ContainingType": "MobileMend.API.Controllers.AddressController",
+    "Method": "AddAddress",
+    "RelativePath": "api/Address/add-address",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "userid",
+        "Type": "System.Guid",
+        "IsRequired": false
+      },
+      {
+        "Name": "newaddress",
+        "Type": "MobileMend.Application.DTOs.AddressCreateDTO",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "MobileMend.API.Controllers.AddressController",
+    "Method": "GetAddress",
+    "RelativePath": "api/Address/get-address",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "userid",
+        "Type": "System.Guid",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "MobileMend.API.Controllers.AddressController",
+    "Method": "RemoveAddress",
+    "RelativePath": "api/Address/remove-address/{addressid}",
+    "HttpMethod": "DELETE",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "addressid",
+        "Type": "System.Guid",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "MobileMend.API.Controllers.AuthController",
+    "Method": "Login",
+    "RelativePath": "api/Auth/login",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "logindata",
+        "Type": "MobileMend.Application.DTOs.LoginDTO",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "MobileMend.API.Controllers.AuthController",
+    "Method": "RefreshAccessToken",
+    "RelativePath": "api/Auth/refresh-token",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "userid",
+        "Type": "System.Guid",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "MobileMend.API.Controllers.AuthController",
+    "Method": "Register",
+    "RelativePath": "api/Auth/register",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "regdata",
+        "Type": "MobileMend.Application.DTOs.RegisterDTO",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "API.Controllers.BookingController",
+    "Method": "BookService",
+    "RelativePath": "api/Booking/book-service",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "userId",
+        "Type": "System.Guid",
+        "IsRequired": false
+      },
+      {
+        "Name": "newbooking",
+        "Type": "MobileMend.Application.DTOs.BookingCreateDTO",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "API.Controllers.BookingController",
+    "Method": "GetBooking",
+    "RelativePath": "api/Booking/get-booking",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "bookingId",
+        "Type": "System.Nullable\u00601[[System.Guid, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
+        "IsRequired": false
+      },
+      {
+        "Name": "status",
+        "Type": "System.String",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "API.Controllers.BookingController",
+    "Method": "SecureData",
+    "RelativePath": "api/Booking/secure-data",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "MobileMend.API.Controllers.DeviceController",
+    "Method": "AddDevice",
+    "RelativePath": "api/Device/add-device",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "newdevice",
+        "Type": "MobileMend.Application.DTOs.DeviceCreateDTO",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "MobileMend.API.Controllers.DeviceController",
+    "Method": "GetAllDevice",
+    "RelativePath": "api/Device/all-device",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "isAdmin",
+        "Type": "System.Boolean",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "MobileMend.API.Controllers.DeviceController",
+    "Method": "DeleteDevice",
+    "RelativePath": "api/Device/delete-device/{deviceid}",
+    "HttpMethod": "DELETE",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "deviceid",
+        "Type": "System.Guid",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "MobileMend.API.Controllers.DeviceController",
+    "Method": "UpdateDevice",
+    "RelativePath": "api/Device/update-device/{deviceid}",
+    "HttpMethod": "PUT",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "deviceid",
+        "Type": "System.Guid",
+        "IsRequired": true
+      },
+      {
+        "Name": "newdevice",
+        "Type": "MobileMend.Application.DTOs.DeviceCreateDTO",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "API.Controllers.RatingController",
+    "Method": "AddRating",
+    "RelativePath": "api/Rating/add",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "newrating",
+        "Type": "Application.DTOs.RatingCreateDTO",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "MobileMend.API.Controllers.ServiceController",
+    "Method": "AddService",
+    "RelativePath": "api/Service/add-service",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "newservice",
+        "Type": "MobileMend.Application.DTOs.ServiceCreateDTO",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "MobileMend.API.Controllers.ServiceController",
+    "Method": "GetAllService",
+    "RelativePath": "api/Service/all-service",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "isAdmin",
+        "Type": "System.Boolean",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "MobileMend.API.Controllers.ServiceController",
+    "Method": "DeleteService",
+    "RelativePath": "api/Service/delete-service/{serviceid}",
+    "HttpMethod": "DELETE",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "serviceid",
+        "Type": "System.Guid",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "MobileMend.API.Controllers.ServiceController",
+    "Method": "UpdateService",
+    "RelativePath": "api/Service/update-service/{serviceid}",
+    "HttpMethod": "PUT",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "serviceid",
+        "Type": "System.Guid",
+        "IsRequired": true
+      },
+      {
+        "Name": "servicedata",
+        "Type": "MobileMend.Application.DTOs.ServiceCreateDTO",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "API.Controllers.SpareController",
+    "Method": "AddSpare",
+    "RelativePath": "api/Spare/add",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "newspare",
+        "Type": "Application.DTOs.SpareCreateDTO",
+        "IsRequired": true
+      },
+      {
+        "Name": "TechnicianID",
+        "Type": "System.Guid",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "MobileMend.API.Controllers.TechnicianController",
+    "Method": "GetRequestByStatus",
+    "RelativePath": "api/Technician/get-request-bystatus",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "status",
+        "Type": "System.String",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "MobileMend.API.Controllers.TechnicianController",
+    "Method": "TechnicianRequest",
+    "RelativePath": "api/Technician/technician-request",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "UserID",
+        "Type": "System.Guid",
+        "IsRequired": false
+      },
+      {
+        "Name": "Experience",
+        "Type": "System.Int32",
+        "IsRequired": false
+      },
+      {
+        "Name": "Resume",
+        "Type": "Microsoft.AspNetCore.Http.IFormFile",
+        "IsRequired": false
+      },
+      {
+        "Name": "Specialization",
+        "Type": "System.String",
+        "IsRequired": false
+      },
+      {
+        "Name": "Bio",
+        "Type": "System.String",
+        "IsRequired": false
+      },
+      {
+        "Name": "Longitude",
+        "Type": "System.Decimal",
+        "IsRequired": false
+      },
+      {
+        "Name": "Latitude",
+        "Type": "System.Decimal",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "MobileMend.API.Controllers.TechnicianController",
+    "Method": "UpdateAvailability",
+    "RelativePath": "api/Technician/update-availability",
+    "HttpMethod": "PATCH",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "technicianId",
+        "Type": "System.Guid",
+        "IsRequired": false
+      },
+      {
+        "Name": "status",
+        "Type": "System.String",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "MobileMend.API.Controllers.TechnicianController",
+    "Method": "UpdateRequestStatus",
+    "RelativePath": "api/Technician/update-request-status",
+    "HttpMethod": "PATCH",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "technicianRequestId",
+        "Type": "System.Guid",
+        "IsRequired": false
+      },
+      {
+        "Name": "status",
+        "Type": "System.Boolean",
+        "IsRequired": false
+      },
+      {
+        "Name": "adminRemarks",
+        "Type": "System.String",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "MobileMend.API.Controllers.TechnicianController",
+    "Method": "UpdateServiceRequest",
+    "RelativePath": "api/Technician/update-service-request",
+    "HttpMethod": "PATCH",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "technicianId",
+        "Type": "System.Guid",
+        "IsRequired": false
+      },
+      {
+        "Name": "statusdata",
+        "Type": "Application.DTOs.UpdateServiceRequestDTO",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "MobileMend.API.Controllers.TechnicianController",
+    "Method": "UpdateServiceStatus",
+    "RelativePath": "api/Technician/update-service-status",
+    "HttpMethod": "PATCH",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "technicianId",
+        "Type": "System.Guid",
+        "IsRequired": false
+      },
+      {
+        "Name": "status",
+        "Type": "System.String",
+        "IsRequired": false
+      },
+      {
+        "Name": "bookingId",
+        "Type": "System.Guid",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  }
+]

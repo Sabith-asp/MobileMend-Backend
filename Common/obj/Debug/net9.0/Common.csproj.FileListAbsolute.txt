@@ -1,0 +1,5 @@
+D:\DOT NET\Project\MobileMend\Common\obj\Debug\net9.0\Common.csproj.AssemblyReference.cache
+D:\DOT NET\Project\MobileMend\Common\obj\Debug\net9.0\Common.GeneratedMSBuildEditorConfig.editorconfig
+D:\DOT NET\Project\MobileMend\Common\obj\Debug\net9.0\Common.AssemblyInfoInputs.cache
+D:\DOT NET\Project\MobileMend\Common\obj\Debug\net9.0\Common.AssemblyInfo.cs
+D:\DOT NET\Project\MobileMend\Common\obj\Debug\net9.0\Common.csproj.CoreCompileInputs.cache

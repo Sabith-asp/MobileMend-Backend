@@ -1,0 +1,5 @@
+D:\DOT NET\Project\MobileMend\Infrastructure\obj\Debug\net9.0\Infrastructure.csproj.AssemblyReference.cache
+D:\DOT NET\Project\MobileMend\Infrastructure\obj\Debug\net9.0\Infrastructure.GeneratedMSBuildEditorConfig.editorconfig
+D:\DOT NET\Project\MobileMend\Infrastructure\obj\Debug\net9.0\Infrastructure.AssemblyInfoInputs.cache
+D:\DOT NET\Project\MobileMend\Infrastructure\obj\Debug\net9.0\Infrastructure.AssemblyInfo.cs
+D:\DOT NET\Project\MobileMend\Infrastructure\obj\Debug\net9.0\Infrastructure.csproj.CoreCompileInputs.cache
