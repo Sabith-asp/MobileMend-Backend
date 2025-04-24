@@ -11,13 +11,16 @@ namespace Application.DTOs
     {
       
             public Guid BookingID { get; set; }
-            public string CustomerName { get; set; }
+        public Guid TechnicianID { get; set; }
+        public string CustomerName { get; set; }
             public string Email { get; set; }
             public string Phone { get; set; }
             public string Issue { get; set; }
             public string BookingStatus { get; set; }
             public string PaymentStatus { get; set; }
             public DateTime CreatedAt { get; set; }
+
+            public int CutomerRating { get; set; }
 
             public string Street { get; set; }
             public string City { get; set; }
@@ -37,6 +40,8 @@ namespace Application.DTOs
         public IEnumerable<GetSpareDTO> Spares { get; set; }
         public decimal SparesTotal { get; set; }
         public BookingPricing BookingCharge { get; set; }
+
+        public BookingCostDetailDTO bookingCostDetails { get; set; }
 
     }
 }

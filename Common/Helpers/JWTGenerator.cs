@@ -30,7 +30,7 @@ namespace MobileMend.Common.Helpers
 
             var token = new JwtSecurityToken(
                 claims: claims,
-                expires: DateTime.UtcNow.AddMinutes(60),
+                expires: DateTime.UtcNow.AddHours(12),
                 signingCredentials: creds
             );
             return new JwtSecurityTokenHandler().WriteToken(token);

@@ -16,9 +16,15 @@ namespace API.Controllers
             spareService = _spareService;
         }
         [HttpPost("add")]
-        public async Task<IActionResult> AddSpare(SpareCreateDTO newspare, Guid TechnicianID)
+        public async Task<IActionResult> AddSpare(SpareCreateDTO newspare)
         { 
-            var response=await spareService.AddSpare(newspare,  TechnicianID);
+            var response=await spareService.AddSpare(newspare, newspare.TechnicianID);
+            return StatusCode(response.StatusCode, response);
+        }
+        [HttpGet("spare-by-bookingId")]
+        public async Task<IActionResult> GetSpareByBookingId(Guid bookingId)
+        {
+            var response = await spareService.GetSpareByBookingId(bookingId);
             return StatusCode(response.StatusCode, response);
         }
     }

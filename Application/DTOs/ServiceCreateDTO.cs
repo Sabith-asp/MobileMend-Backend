@@ -3,7 +3,10 @@
 namespace MobileMend.Application.DTOs
 {
     public class ServiceCreateDTO
+
     {
+        public Guid? ServiceId { get; set; }
+
         [Required]
         public string ServiceName { get; set; }
         [Required]

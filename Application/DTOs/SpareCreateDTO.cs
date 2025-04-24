@@ -12,5 +12,6 @@ namespace Application.DTOs
         public decimal Price { get; set; }
         public int Qty { get; set; }
         public Guid BookingID { get; set; }
+        public Guid TechnicianID { get; set; }
     }
 }

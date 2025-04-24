@@ -26,16 +26,7 @@ namespace Application.Services
         }
         public async Task<string> UploadDocumentAsync(IFormFile file, string folderName)
         {
-            //await using var stream = file.OpenReadStream();
 
-            //var uploadParams = new RawUploadParams
-            //{
-            //    File = new FileDescription(file.FileName, stream),
-            //    Folder = folderName
-            //};
-
-            //var result = await _cloudinary.UploadAsync(uploadParams);
-            //return result.SecureUrl.ToString();
 
 
             await using var stream = file.OpenReadStream();

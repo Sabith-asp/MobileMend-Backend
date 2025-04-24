@@ -1,4 +1,5 @@
-﻿using AutoMapper;
+﻿using Application.DTOs;
+using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using MobileMend.Application.DTOs;
 using MobileMend.Application.Interfaces.Repositories;
@@ -35,10 +36,10 @@ namespace MobileMend.Application.Services
 
         }
 
-        public async Task<ResponseDTO<object>> UpdateService(Guid serviceid, ServiceCreateDTO servicedata)
+        public async Task<ResponseDTO<object>> UpdateService(ServiceCreateDTO servicedata)
         {
             try {
-                var result=await servicerepo.UpdateService(serviceid, servicedata);
+                var result=await servicerepo.UpdateService(servicedata.ServiceId, servicedata);
                 if (result < 1) {
                     return new ResponseDTO<object> { StatusCode = 400, Message = "Error in updating service" };
                 }
@@ -60,22 +61,25 @@ namespace MobileMend.Application.Services
             }
         }
 
-        public async Task<ResponseDTO<IEnumerable<object>>> GetAllService(bool isAdmin) {
-            try {
-                var services=await servicerepo.GetAllServices();
-                if (isAdmin)
+        public async Task<ResponseDTO<IEnumerable<ServiceDTO>>> GetService(ServiceFilterDTO filter)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(filter.Search))
                 {
-                    return new ResponseDTO<IEnumerable<object>> { StatusCode = 200, Message = "services retrieved", Data = services };
+                    filter.Search = null;
                 }
-                else {
-                    var data=mapper.Map<IEnumerable<ServiceDTO>>(services.Where(service=>service.IsDeleted==false));
-                    return new ResponseDTO<IEnumerable<object>> { StatusCode = 200, Message = "services retrieved", Data=data };
-                    }
-            } catch (Exception ex) {
-                return new ResponseDTO<IEnumerable<object>> { StatusCode = 500, Error = ex.Message };
+                var services = await servicerepo.GetServices(filter);
 
+                var serviceDTOs = services.Select(service => mapper.Map<ServiceDTO>(service));
+
+                return new ResponseDTO<IEnumerable<ServiceDTO>> { StatusCode = 200, Message = "Services retrieved", Data = serviceDTOs };
             }
-
+            catch (Exception ex)
+            {
+                return new ResponseDTO<IEnumerable<ServiceDTO>> { StatusCode = 500, Error = ex.Message };
+            }
         }
+
     }
 }

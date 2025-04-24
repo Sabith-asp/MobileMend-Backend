@@ -1,4 +1,5 @@
-﻿using AutoMapper;
+﻿using Application.DTOs;
+using AutoMapper;
 using MobileMend.Application.DTOs;
 using MobileMend.Application.Interfaces.Repositories;
 using MobileMend.Application.Interfaces.Services;
@@ -14,19 +15,23 @@ namespace MobileMend.Application.Services
             mapper = _mapper;
         }
 
-        public async Task<ResponseDTO<IEnumerable<object>>> GetAllDevice(bool isAdmin)
+        public async Task<ResponseDTO<IEnumerable<object>>> GetDevice(bool isAdmin,DeviceFilterDTO filter)
         {
             try
             {
+                if (string.IsNullOrWhiteSpace(filter.Search))
+                {
+                    filter.Search = null;
+                }
 
-                var result = await devicerepo.GetAllDevice(isAdmin);
+                var result = await devicerepo.GetDevice(filter);
                 if (isAdmin) {
 
                     return new ResponseDTO<IEnumerable<object>> { StatusCode = 200, Message = "Devices retrieved",Data=result };
 
                 }
                 var data=mapper.Map<IEnumerable<DeviceDTO>>(result.Where(device=>device.isDeleted==false));
-                return new ResponseDTO<IEnumerable<object>> { StatusCode = 200, Message = "Device retrieved", Data = data };
+                return new ResponseDTO<IEnumerable<object>> { StatusCode = 200, Message = "Devices retrieved", Data = data };
             }
             catch (Exception ex)
             {
@@ -49,7 +54,7 @@ namespace MobileMend.Application.Services
 
         }
 
-        public async Task<ResponseDTO<object>> UpdateDevice(Guid deviceid,DeviceCreateDTO newdevice)
+        public async Task<ResponseDTO<object>> UpdateDevice(Guid? deviceid,DeviceCreateDTO newdevice)
         {
             try
             {

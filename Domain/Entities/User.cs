@@ -22,6 +22,8 @@
         public bool IsBlocked { get; set; }
 
         public string RefreshToken { get; set; }
+        public bool EmailConfirmed { get; set; }
+        public string EmailVerificationToken { get; set; }
         public DateTime RefreshTokenExpiry { get; set; }
 
 

@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Application.DTOs;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Services;
+using Microsoft.AspNetCore.Mvc;
 using MobileMend.Application.DTOs;
 
 namespace Application.Services
@@ -33,5 +34,19 @@ namespace Application.Services
                 return new ResponseDTO<object> { StatusCode = 500, Error = ex.Message };
             }
         }
+
+        public async Task<ResponseDTO<object>> GetSpareByBookingId(Guid bookingId) {
+            try
+            {
+                var result = await spareRepository.GetSpareByBookingId(bookingId);
+                return new ResponseDTO<object> { StatusCode = 200, Message = "Spare by bookingId retrieved",Data= result };
+
+            }
+            catch (Exception ex)
+            {
+                return new ResponseDTO<object> { StatusCode = 500, Error = ex.Message };
+            }
+        }
     }
+
 }

@@ -14,7 +14,7 @@ namespace MobileMend.Application.Services
             addressRepo = _addressRepo;
             mapper=_mapper;
         }
-        public async Task<ResponseDTO<object>> AddAddress(Guid userid,AddressCreateDTO newaddress) {
+        public async Task<ResponseDTO<object>> AddAddress(string userid,AddressCreateDTO newaddress) {
             try {
             
                 var result=await addressRepo.AddAddress(userid,newaddress);
@@ -49,7 +49,7 @@ namespace MobileMend.Application.Services
             }
         }
 
-        public async Task<ResponseDTO<IEnumerable<AddressDTO>>> GetAddress(Guid userid)
+        public async Task<ResponseDTO<IEnumerable<AddressDTO>>> GetAddress(string userid)
         {
             try
             {

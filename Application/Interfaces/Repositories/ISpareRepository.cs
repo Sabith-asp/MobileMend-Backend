@@ -11,5 +11,6 @@ namespace Application.Interfaces.Repositories
     public interface ISpareRepository
     {
         Task<int> AddSpare(SpareCreateDTO newSpare, Guid TechnicianID);
+        Task<IEnumerable<GetSpareDTO>> GetSpareByBookingId(Guid bookingId);
     }
 }

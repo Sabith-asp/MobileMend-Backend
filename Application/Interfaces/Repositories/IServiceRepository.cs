@@ -1,4 +1,5 @@
 ﻿
+using Application.DTOs;
 using MobileMend.Application.DTOs;
 using MobileMend.Domain.Entities;
 
@@ -8,10 +9,10 @@ namespace MobileMend.Application.Interfaces.Repositories
     {
 
         Task<int> AddService(ServiceCreateDTO newservice);
-        Task<int> UpdateService(Guid Serviceid, ServiceCreateDTO servicedata);
+        Task<int> UpdateService(Guid? Serviceid, ServiceCreateDTO servicedata);
         Task<int> DeleteService(Guid serviceid);
 
-        Task<IEnumerable<Service>> GetAllServices();
+        Task<IEnumerable<Service>> GetServices(ServiceFilterDTO filterData);
 
     }
 }

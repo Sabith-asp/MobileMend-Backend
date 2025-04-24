@@ -8,6 +8,7 @@ namespace Application.DTOs
 {
     public class UpdateServiceRequestDTO
     {
+        public Guid TechnicianId { get; set; }
         public Guid BookingID { get; set; }
         public bool Status { get; set; }
         public string? RejectionReason { get; set; }

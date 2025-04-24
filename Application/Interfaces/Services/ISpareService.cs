@@ -11,5 +11,6 @@ namespace Application.Interfaces.Services
     public interface ISpareService
     {
         Task<ResponseDTO<object>> AddSpare(SpareCreateDTO newSpare, Guid TechnicianID);
+        Task<ResponseDTO<object>> GetSpareByBookingId(Guid bookingId);
     }
 }

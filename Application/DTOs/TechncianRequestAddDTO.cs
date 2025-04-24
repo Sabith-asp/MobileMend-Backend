@@ -11,7 +11,7 @@ namespace Application.DTOs
     public class TechncianRequestAddDTO
     {
 
-        public Guid UserID { get; set; }
+        public string UserID { get; set; }
 
         public int Experience { get; set; }
 
@@ -20,6 +20,7 @@ namespace Application.DTOs
         public string Specialization { get; set; }
 
         public string Bio { get; set; }
+        public string Place { get; set; }
 
         public decimal Longitude { get; set; }
         public decimal Latitude { get; set; }

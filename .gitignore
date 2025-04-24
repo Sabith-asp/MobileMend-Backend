@@ -1,1 +1,31 @@
+# Ignore Visual Studio files
 .vs/
+.vscode/
+.idea/
+# User-specific files
+*.user
+*.userosscache
+*.suo
+*.userprefs
+# Build results
+bin/
+obj/
+# .NET Core & Visual Studio config files
+project.lock.json
+project.fragment.lock.json
+artifacts/
+# Docker-related
+*.dockerfile
+Dockerfile
+.dockerignore
+# .env (if you're not using it in Docker)
+.env
+# macOS specific files
+.DS_Store
+# Windows specific files
+Thumbs.db
+# Logs
+logs/
+*.log
+# JetBrains Rider settings folder
+.idea/

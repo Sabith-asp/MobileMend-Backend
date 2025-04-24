@@ -7,6 +7,7 @@ using Application.DTOs;
 using Application.Interfaces.Repositories;
 using Dapper;
 using MobileMend.Application.DTOs;
+using MobileMend.Domain.Entities;
 using MobileMend.Infrastructure.Data;
 
 namespace Infrastructure.Repositories
@@ -18,10 +19,18 @@ namespace Infrastructure.Repositories
         context = _context;
         }
         public async Task<int> AddSpare(SpareCreateDTO newSpare,Guid TechnicianID) {
-            var sql = "insert into usedspares (Id,SpareName,Price,Qty,BookingID,AddedBy) values (UUID(),@SpairName,@Price,@Qty,@BookingID,@AddedBy)";
+            var sql = "insert into UsedSpares (Id,SpareName,Price,Qty,BookingID,AddedBy) values (UUID(),@SpairName,@Price,@Qty,@BookingID,@AddedBy)";
             using var connection= context.CreateConnection();
            var rowsaffected= await connection.ExecuteAsync(sql, new { SpairName=newSpare.SpareName,Price=newSpare.Price,Qty=newSpare.Qty,BookingID=newSpare.BookingID,AddedBy= TechnicianID });
             return rowsaffected;
         }
+
+        public async Task<IEnumerable<GetSpareDTO>> GetSpareByBookingId(Guid bookingId) {
+            var spareQuery = @"SELECT ID, SpareName, Price, Qty, TotalCost FROM UsedSpares WHERE bookingid = @BookingID";
+            using var connection=context.CreateConnection();
+            return await connection.QueryAsync<GetSpareDTO>(spareQuery, new { BookingID = bookingId });
+
+        }
+
     }
 }

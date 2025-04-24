@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using API.Controllers.Base;
+using Application.DTOs;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using MobileMend.Application.DTOs;
 using MobileMend.Application.Interfaces.Services;
@@ -7,7 +9,7 @@ namespace MobileMend.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class DeviceController : ControllerBase
+    public class DeviceController : BaseController
     {
         private readonly IDeviceService deviceService;
         public DeviceController(IDeviceService _deviceservice)
@@ -15,10 +17,15 @@ namespace MobileMend.API.Controllers
             deviceService = _deviceservice;
         }
 
-        [HttpGet("all-device")]
-        public async Task<IActionResult> GetAllDevice(bool isAdmin)
+        [HttpGet("get-device")]
+        public async Task<IActionResult> GetDevice(string? search, Guid? deviceId)
         {
-            var response = await deviceService.GetAllDevice(isAdmin);
+            var filter = new DeviceFilterDTO {Search=search,DeviceId=deviceId};
+            bool isAdmin = false;
+            if (Role == "Admin") { 
+                isAdmin = true;
+            }
+            var response = await deviceService.GetDevice(isAdmin, filter);
             return StatusCode(response.StatusCode, response);
         }
 
@@ -29,14 +36,14 @@ namespace MobileMend.API.Controllers
             return StatusCode(response.StatusCode, response);
         }
 
-        [HttpPut("update-device/{deviceid}")]
-        public async Task<IActionResult> UpdateDevice(Guid deviceid,DeviceCreateDTO newdevice)
+        [HttpPut("update-device")]
+        public async Task<IActionResult> UpdateDevice(DeviceCreateDTO newdevice)
         {
-            var response = await deviceService.UpdateDevice(deviceid, newdevice);
+            var response = await deviceService.UpdateDevice(newdevice.deviceid, newdevice);
             return StatusCode(response.StatusCode, response);
         }
 
-        [HttpDelete("delete-device/{deviceid}")]
+        [HttpDelete("delete-device")]
         public async Task<IActionResult> DeleteDevice(Guid deviceid)
         {
             var response = await deviceService.DeleteDevice(deviceid);

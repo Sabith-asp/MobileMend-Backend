@@ -8,9 +8,12 @@ namespace Domain.Enums
 {
     public enum ServiceStatus
     {
+        Assigned,
+        InProgress,
+        Accepted,
+        Rejected,
         Reached,
         Started,
         Completed
-
     }
 }

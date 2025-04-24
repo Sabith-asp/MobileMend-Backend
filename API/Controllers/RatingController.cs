@@ -19,5 +19,15 @@ namespace API.Controllers
             var response=await ratingService.AddRating(newrating);
             return StatusCode(response.StatusCode, response);
         }
+
+
+        [HttpDelete("hide")]
+        public async Task<IActionResult> HideReview(Guid reviewId)
+        {
+
+            var response = await ratingService.HideReview( reviewId);
+            return StatusCode(response.StatusCode, response);
+        }
+
     }
 }

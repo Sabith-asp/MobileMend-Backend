@@ -10,6 +10,8 @@ namespace Application.Interfaces.Repositories
 {
     public interface IRatingRepository
     {
-        Task<int> AddRating(RatingCreateDTO newrating);
+        Task<int> AddOrUpdateRating(RatingCreateDTO newrating);
+        Task<int> HideReview(Guid reviewId);
+        Task<string> GetStatus(Guid bookingId);
     }
 }

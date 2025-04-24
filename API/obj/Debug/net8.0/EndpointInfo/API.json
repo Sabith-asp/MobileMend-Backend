@@ -10,16 +10,6 @@
         "tags": [
           "Address"
         ],
-        "parameters": [
-          {
-            "name": "userid",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -74,15 +64,17 @@
         "tags": [
           "Address"
         ],
-        "parameters": [
-          {
-            "name": "userid",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
+        "responses": {
+          "200": {
+            "description": "OK"
           }
+        }
+      }
+    },
+    "/api/Admin/dashboard-data": {
+      "get": {
+        "tags": [
+          "Admin"
         ],
         "responses": {
           "200": {
@@ -175,20 +167,34 @@
         }
       }
     },
-    "/api/Booking/book-service": {
+    "/api/Auth/logout": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/Auth/me": {
+      "get": {
+        "tags": [
+          "Auth"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/Booking/confirm-booking": {
       "post": {
         "tags": [
           "Booking"
-        ],
-        "parameters": [
-          {
-            "name": "userId",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
         ],
         "requestBody": {
           "content": {
@@ -234,6 +240,21 @@
             "name": "status",
             "in": "query",
             "schema": {
+              "$ref": "#/components/schemas/ServiceStatus"
+            }
+          },
+          {
+            "name": "technicianId",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "searchString",
+            "in": "query",
+            "schema": {
               "type": "string"
             }
           }
@@ -257,17 +278,63 @@
         }
       }
     },
-    "/api/Device/all-device": {
+    "/api/Booking/get-booking-estimate": {
+      "get": {
+        "tags": [
+          "Booking"
+        ],
+        "parameters": [
+          {
+            "name": "technicianId",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "addressId",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "serviceId",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/Device/get-device": {
       "get": {
         "tags": [
           "Device"
         ],
         "parameters": [
           {
-            "name": "isAdmin",
+            "name": "search",
             "in": "query",
             "schema": {
-              "type": "boolean"
+              "type": "string"
+            }
+          },
+          {
+            "name": "deviceId",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
             }
           }
         ],
@@ -309,21 +376,10 @@
         }
       }
     },
-    "/api/Device/update-device/{deviceid}": {
+    "/api/Device/update-device": {
       "put": {
         "tags": [
           "Device"
-        ],
-        "parameters": [
-          {
-            "name": "deviceid",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
         ],
         "requestBody": {
           "content": {
@@ -351,7 +407,7 @@
         }
       }
     },
-    "/api/Device/delete-device/{deviceid}": {
+    "/api/Device/delete-device": {
       "delete": {
         "tags": [
           "Device"
@@ -359,11 +415,38 @@
         "parameters": [
           {
             "name": "deviceid",
-            "in": "path",
-            "required": true,
+            "in": "query",
             "schema": {
               "type": "string",
               "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/EmailService/confirm": {
+      "get": {
+        "tags": [
+          "EmailService"
+        ],
+        "parameters": [
+          {
+            "name": "email",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "token",
+            "in": "query",
+            "schema": {
+              "type": "string"
             }
           }
         ],
@@ -405,17 +488,47 @@
         }
       }
     },
-    "/api/Service/all-service": {
+    "/api/Rating/hide": {
+      "delete": {
+        "tags": [
+          "Rating"
+        ],
+        "parameters": [
+          {
+            "name": "reviewId",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/Service/get-service": {
       "get": {
         "tags": [
           "Service"
         ],
         "parameters": [
           {
-            "name": "isAdmin",
+            "name": "search",
             "in": "query",
             "schema": {
-              "type": "boolean"
+              "type": "string"
+            }
+          },
+          {
+            "name": "serviceId",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
             }
           }
         ],
@@ -457,21 +570,10 @@
         }
       }
     },
-    "/api/Service/update-service/{serviceid}": {
+    "/api/Service/update-service": {
       "put": {
         "tags": [
           "Service"
-        ],
-        "parameters": [
-          {
-            "name": "serviceid",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
         ],
         "requestBody": {
           "content": {
@@ -499,7 +601,7 @@
         }
       }
     },
-    "/api/Service/delete-service/{serviceid}": {
+    "/api/Service/delete-service": {
       "delete": {
         "tags": [
           "Service"
@@ -507,8 +609,7 @@
         "parameters": [
           {
             "name": "serviceid",
-            "in": "path",
-            "required": true,
+            "in": "query",
             "schema": {
               "type": "string",
               "format": "uuid"
@@ -527,16 +628,6 @@
         "tags": [
           "Spare"
         ],
-        "parameters": [
-          {
-            "name": "TechnicianID",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -556,6 +647,87 @@
             }
           }
         },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/Spare/spare-by-bookingId": {
+      "get": {
+        "tags": [
+          "Spare"
+        ],
+        "parameters": [
+          {
+            "name": "bookingId",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/Technician/get-best-technicians": {
+      "get": {
+        "tags": [
+          "Technician"
+        ],
+        "parameters": [
+          {
+            "name": "customerAddressId",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "deviceId",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/Technician/get-technicians": {
+      "get": {
+        "tags": [
+          "Technician"
+        ],
+        "parameters": [
+          {
+            "name": "technicianId",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK"
@@ -575,18 +747,12 @@
                 "required": [
                   "Bio",
                   "Experience",
-                  "Latitude",
-                  "Longitude",
+                  "Place",
                   "Resume",
-                  "Specialization",
-                  "UserID"
+                  "Specialization"
                 ],
                 "type": "object",
                 "properties": {
-                  "UserID": {
-                    "type": "string",
-                    "format": "uuid"
-                  },
                   "Experience": {
                     "type": "integer",
                     "format": "int32"
@@ -601,6 +767,9 @@
                   "Bio": {
                     "type": "string"
                   },
+                  "Place": {
+                    "type": "string"
+                  },
                   "Longitude": {
                     "type": "number",
                     "format": "double"
@@ -612,9 +781,6 @@
                 }
               },
               "encoding": {
-                "UserID": {
-                  "style": "form"
-                },
                 "Experience": {
                   "style": "form"
                 },
@@ -625,6 +791,9 @@
                   "style": "form"
                 },
                 "Bio": {
+                  "style": "form"
+                },
+                "Place": {
                   "style": "form"
                 },
                 "Longitude": {
@@ -649,30 +818,25 @@
         "tags": [
           "Technician"
         ],
-        "parameters": [
-          {
-            "name": "technicianRequestId",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "status",
-            "in": "query",
-            "schema": {
-              "type": "boolean"
-            }
-          },
-          {
-            "name": "adminRemarks",
-            "in": "query",
-            "schema": {
-              "type": "string"
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateTechnicianRequestDTO"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateTechnicianRequestDTO"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateTechnicianRequestDTO"
+              }
             }
           }
-        ],
+        },
         "responses": {
           "200": {
             "description": "OK"
@@ -680,7 +844,7 @@
         }
       }
     },
-    "/api/Technician/get-request-bystatus": {
+    "/api/Technician/get-requests": {
       "get": {
         "tags": [
           "Technician"
@@ -691,6 +855,13 @@
             "in": "query",
             "schema": {
               "$ref": "#/components/schemas/TechnicianRequestStatuses"
+            }
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "schema": {
+              "type": "string"
             }
           }
         ],
@@ -705,16 +876,6 @@
       "patch": {
         "tags": [
           "Technician"
-        ],
-        "parameters": [
-          {
-            "name": "technicianId",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
         ],
         "requestBody": {
           "content": {
@@ -747,9 +908,71 @@
         "tags": [
           "Technician"
         ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateServiceStatusDTO"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateServiceStatusDTO"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateServiceStatusDTO"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/Technician/update-availability": {
+      "patch": {
+        "tags": [
+          "Technician"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateAvailablityDTO"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateAvailablityDTO"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateAvailablityDTO"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/Technician/find-technician-auto": {
+      "get": {
+        "tags": [
+          "Technician"
+        ],
         "parameters": [
           {
-            "name": "technicianId",
+            "name": "addressId",
             "in": "query",
             "schema": {
               "type": "string",
@@ -757,14 +980,7 @@
             }
           },
           {
-            "name": "status",
-            "in": "query",
-            "schema": {
-              "$ref": "#/components/schemas/ServiceStatus"
-            }
-          },
-          {
-            "name": "bookingId",
+            "name": "deviceId",
             "in": "query",
             "schema": {
               "type": "string",
@@ -779,7 +995,38 @@
         }
       }
     },
-    "/api/Technician/update-availability": {
+    "/api/Technician/update-current-location": {
+      "patch": {
+        "tags": [
+          "Technician"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateCurrentLocationDTO"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateCurrentLocationDTO"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateCurrentLocationDTO"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/Technician/block-technician/{technicianId}": {
       "patch": {
         "tags": [
           "Technician"
@@ -787,19 +1034,48 @@
         "parameters": [
           {
             "name": "technicianId",
-            "in": "query",
+            "in": "path",
+            "required": true,
             "schema": {
               "type": "string",
               "format": "uuid"
             }
-          },
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/Technician/remove-technician/{technicianId}": {
+      "delete": {
+        "tags": [
+          "Technician"
+        ],
+        "parameters": [
           {
-            "name": "status",
-            "in": "query",
+            "name": "technicianId",
+            "in": "path",
+            "required": true,
             "schema": {
-              "$ref": "#/components/schemas/TechnicianAvailabilityStatus"
+              "type": "string",
+              "format": "uuid"
             }
           }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/Technician/dashboard-data": {
+      "get": {
+        "tags": [
+          "Technician"
         ],
         "responses": {
           "200": {
@@ -857,10 +1133,6 @@
       "BookingCreateDTO": {
         "type": "object",
         "properties": {
-          "customerID": {
-            "type": "string",
-            "format": "uuid"
-          },
           "addressID": {
             "type": "string",
             "format": "uuid"
@@ -875,8 +1147,7 @@
           },
           "technicianID": {
             "type": "string",
-            "format": "uuid",
-            "nullable": true
+            "format": "uuid"
           },
           "email": {
             "type": "string",
@@ -900,6 +1171,11 @@
       "DeviceCreateDTO": {
         "type": "object",
         "properties": {
+          "deviceid": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
           "deviceName": {
             "type": "string",
             "nullable": true
@@ -939,11 +1215,15 @@
         "type": "object",
         "properties": {
           "userName": {
-            "minLength": 1,
+            "maxLength": 20,
+            "minLength": 3,
+            "pattern": "^[a-zA-Z0-9]+$",
             "type": "string"
           },
           "password": {
-            "minLength": 1,
+            "maxLength": 100,
+            "minLength": 6,
+            "pattern": "^(?=.*[a-z])(?=.*\\d)(?=.*[!@#$%^&*(),.?\"{}|<>]).{6,}$",
             "type": "string"
           }
         },
@@ -981,8 +1261,19 @@
         ],
         "type": "object",
         "properties": {
+          "name": {
+            "minLength": 3,
+            "pattern": "^[a-zA-Z\\s]+$",
+            "type": "string"
+          },
           "userName": {
+            "minLength": 3,
+            "pattern": "^[a-zA-Z0-9]+$",
+            "type": "string"
+          },
+          "phone": {
             "minLength": 1,
+            "pattern": "^[6-9]\\d{9}$",
             "type": "string"
           },
           "email": {
@@ -990,17 +1281,9 @@
             "type": "string",
             "format": "email"
           },
-          "name": {
-            "minLength": 1,
-            "type": "string"
-          },
-          "phone": {
-            "minLength": 1,
-            "type": "string",
-            "format": "tel"
-          },
           "password": {
             "minLength": 6,
+            "pattern": "^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d)(?=.*[!@#$%^&*(),.?\"{}|<>]).{6,}$",
             "type": "string"
           }
         },
@@ -1017,6 +1300,11 @@
         ],
         "type": "object",
         "properties": {
+          "serviceId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
           "serviceName": {
             "minLength": 1,
             "type": "string"
@@ -1047,6 +1335,10 @@
       },
       "ServiceStatus": {
         "enum": [
+          "Assigned",
+          "InProgress",
+          "Accepted",
+          "Rejected",
           "Reached",
           "Started",
           "Completed"
@@ -1071,6 +1363,10 @@
           "bookingID": {
             "type": "string",
             "format": "uuid"
+          },
+          "technicianID": {
+            "type": "string",
+            "format": "uuid"
           }
         },
         "additionalProperties": false
@@ -1078,7 +1374,7 @@
       "TechnicianAvailabilityStatus": {
         "enum": [
           "Unavailable",
-          "Available",
+          "Online",
           "Busy",
           "Offline"
         ],
@@ -1092,9 +1388,40 @@
         ],
         "type": "string"
       },
+      "UpdateAvailablityDTO": {
+        "type": "object",
+        "properties": {
+          "technicianAvailabilityStatus": {
+            "$ref": "#/components/schemas/TechnicianAvailabilityStatus"
+          }
+        },
+        "additionalProperties": false
+      },
+      "UpdateCurrentLocationDTO": {
+        "type": "object",
+        "properties": {
+          "technicianId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "latitude": {
+            "type": "number",
+            "format": "double"
+          },
+          "longitude": {
+            "type": "number",
+            "format": "double"
+          }
+        },
+        "additionalProperties": false
+      },
       "UpdateServiceRequestDTO": {
         "type": "object",
         "properties": {
+          "technicianId": {
+            "type": "string",
+            "format": "uuid"
+          },
           "bookingID": {
             "type": "string",
             "format": "uuid"
@@ -1103,6 +1430,40 @@
             "type": "boolean"
           },
           "rejectionReason": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "UpdateServiceStatusDTO": {
+        "type": "object",
+        "properties": {
+          "technicianId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "status": {
+            "$ref": "#/components/schemas/ServiceStatus"
+          },
+          "bookingId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "additionalProperties": false
+      },
+      "UpdateTechnicianRequestDTO": {
+        "type": "object",
+        "properties": {
+          "technicianRequestId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "status": {
+            "type": "boolean"
+          },
+          "adminRemarks": {
             "type": "string",
             "nullable": true
           }

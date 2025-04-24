@@ -9,7 +9,7 @@ namespace Domain.Enums
     public enum TechnicianAvailabilityStatus
     {
         Unavailable,
-        Available,
+        Online,
         Busy,
         Offline
     }

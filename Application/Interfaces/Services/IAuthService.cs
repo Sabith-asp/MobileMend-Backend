@@ -9,5 +9,10 @@ namespace MobileMend.Application.Interfaces.Services
         Task<ResponseDTO<object>> Login(LoginDTO logindata);
 
         Task<ResponseDTO<object>> RefreshAccessToken(Guid userid);
+
+        Task<Guid> GetTechnicianIdByUserId(string userid);
+        Task<string> GetTechnicianStatus(Guid technicianId);
+
+
     }
 }

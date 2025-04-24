@@ -5,8 +5,8 @@ namespace MobileMend.Application.Interfaces.Repositories
 {
     public interface IAddressRepository
     {
-        Task<int> AddAddress(Guid userid,AddressCreateDTO newaddress);
+        Task<int> AddAddress(string userid,AddressCreateDTO newaddress);
         Task<int> RemoveAddress(Guid addressid);
-        Task<IEnumerable<Address>> GetAddress(Guid userid);
+        Task<IEnumerable<Address>> GetAddress(string userid);
     }
 }

@@ -1,9 +1,13 @@
 ﻿using System.Security.Cryptography;
+using Application.Interfaces.Services;
+using Application.Services;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Configuration;
 using MobileMend.Application.DTOs;
 using MobileMend.Application.Interfaces.Repositories;
 using MobileMend.Application.Interfaces.Services;
 using MobileMend.Common.Helpers;
+using MobileMend.Domain.Entities;
 //using Org.BouncyCastle.Crypto.Generators;
 //using Sprache;
 
@@ -15,10 +19,14 @@ namespace MobileMend.Application.Services
         private readonly IAuthRepository authrepo;
         private readonly JWTGenerator jwtgenerator;
         private readonly IHttpContextAccessor httpContextAccessor;
-        public AuthService(IAuthRepository _authrepo,JWTGenerator _jwtgenerator, IHttpContextAccessor _httpContextAccessor) { 
+        private readonly IEmailService emailService;
+        private readonly IConfiguration config;
+        public AuthService(IAuthRepository _authrepo,JWTGenerator _jwtgenerator, IHttpContextAccessor _httpContextAccessor,IEmailService _emailService,IConfiguration _config) { 
         authrepo = _authrepo;
             jwtgenerator = _jwtgenerator;
             httpContextAccessor = _httpContextAccessor;
+            emailService = _emailService;
+            config = _config;
         }
         public async Task<ResponseDTO<object>> Register(RegisterDTO regdata)
         {
@@ -34,8 +42,17 @@ namespace MobileMend.Application.Services
                 }
 
                 regdata.Password = Hashpassword(regdata.Password);
-                await authrepo.Register(regdata);
-                return new ResponseDTO<object> { StatusCode = 201, Message = "Registration Successful" };
+                var userId = Guid.NewGuid();
+                await authrepo.Register(regdata, userId);
+
+
+                var token = Guid.NewGuid().ToString(); // Can use better token gen
+                await authrepo.updateEmailVerifyToken(userId, token);
+                var domainURL = config["AppSettings:BackendUrl"];
+                var verificationLink = $"{domainURL}/api/EmailService/confirm?email={regdata.Email}&token={token}";
+                await emailService.SendEmailAsync(regdata.Email, "Verify your email", $"Click to verify: {verificationLink}");
+
+                return new ResponseDTO<object> { StatusCode = 201, Message = "Registration Successful. Verify your email to login" };
             
             } catch (Exception ex) {
                 return new ResponseDTO<object> { StatusCode = 500,Error=ex.Message};
@@ -50,6 +67,10 @@ namespace MobileMend.Application.Services
                 var user = await authrepo.GetByUserName(logindata.UserName);
                 if (user == null) {
                     return new ResponseDTO<object> { StatusCode = 404,Message="User not found" };
+                }
+                if (!user.EmailConfirmed) {
+                    return new ResponseDTO<object> { StatusCode = 400, Message = "Verify your email to login" };
+
                 }
                 if (user.IsBlocked) {
                     return new ResponseDTO<object> { StatusCode = 400, Message = "You are blocked by admin" };
@@ -68,8 +89,8 @@ namespace MobileMend.Application.Services
                     context.Response.Cookies.Append("accessToken", token, new CookieOptions
                     {
                         HttpOnly = true,
-                        Secure = false,
-                        SameSite = SameSiteMode.Lax,
+                        Secure = true,
+                        SameSite = SameSiteMode.None,
                         Expires = DateTime.Now.AddDays(7)
                     });
                 }
@@ -106,8 +127,8 @@ namespace MobileMend.Application.Services
                     context.Response.Cookies.Append("accessToken", accessToken, new CookieOptions
                     {
                         HttpOnly = true,
-                        Secure = false,
-                        SameSite = SameSiteMode.Lax,
+                        Secure = true,
+                        SameSite = SameSiteMode.None,
                         Expires = DateTime.Now.AddDays(7)
                     });
                 }
@@ -125,6 +146,31 @@ namespace MobileMend.Application.Services
                 return new ResponseDTO<object> { StatusCode = 500, Error = ex.Message };
             }
         
+        }
+
+        public async Task<Guid> GetTechnicianIdByUserId(string userid)
+        {
+            try {
+                var technicianid = await authrepo.GetTechnicianIdByUserId(userid);
+                return technicianid;
+            } catch (Exception ex) { 
+            throw new Exception(ex.Message);
+            }
+        }
+
+        public async Task<string> GetTechnicianStatus(Guid technicianId)
+        {
+            try
+            {
+                var technicianStatus = await authrepo.GetTechnicianStatus(technicianId);
+
+                return technicianStatus;
+            }
+            catch (Exception ex)
+            {
+                return ex.Message;
+
+            }
         }
 
 
