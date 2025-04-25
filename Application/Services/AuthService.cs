@@ -49,6 +49,7 @@ namespace MobileMend.Application.Services
                 var token = Guid.NewGuid().ToString(); // Can use better token gen
                 await authrepo.updateEmailVerifyToken(userId, token);
                 var domainURL = config["AppSettings:BackendUrl"];
+                Console.WriteLine(domainURL);
                 var verificationLink = $"{domainURL}/api/EmailService/confirm?email={regdata.Email}&token={token}";
                 await emailService.SendEmailAsync(regdata.Email, "Verify your email", $"Click to verify: {verificationLink}");
 

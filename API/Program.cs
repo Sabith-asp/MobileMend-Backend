@@ -20,8 +20,12 @@ using System.Text.Json.Serialization;
 var builder = WebApplication.CreateBuilder(args);
 
 Env.Load();
+
 builder.Configuration["ConnectionStrings:ConnStr"] =
     Environment.GetEnvironmentVariable("DB_CONNECTION");
+builder.Configuration["AppSettings:BackendUrl"] =
+    Environment.GetEnvironmentVariable("BACKEND_URL");
+
 // Add services to the container.
 
 builder.Services.AddControllers()
