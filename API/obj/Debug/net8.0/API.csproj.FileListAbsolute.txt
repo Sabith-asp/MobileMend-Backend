@@ -68,7 +68,6 @@ D:\DOT NET\Project\MobileMend\API\obj\Debug\net8.0\API.AssemblyInfo.cs
 D:\DOT NET\Project\MobileMend\API\obj\Debug\net8.0\API.csproj.CoreCompileInputs.cache
 D:\DOT NET\Project\MobileMend\API\obj\Debug\net8.0\API.MvcApplicationPartsAssemblyInfo.cs
 D:\DOT NET\Project\MobileMend\API\obj\Debug\net8.0\API.MvcApplicationPartsAssemblyInfo.cache
-D:\DOT NET\Project\MobileMend\API\obj\Debug\net8.0\API.sourcelink.json
 D:\DOT NET\Project\MobileMend\API\obj\Debug\net8.0\scopedcss\bundle\API.styles.css
 D:\DOT NET\Project\MobileMend\API\obj\Debug\net8.0\staticwebassets.build.json
 D:\DOT NET\Project\MobileMend\API\obj\Debug\net8.0\staticwebassets.development.json

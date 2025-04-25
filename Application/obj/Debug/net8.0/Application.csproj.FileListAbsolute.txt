@@ -10,7 +10,6 @@ D:\DOT NET\Project\MobileMend\Application\obj\Debug\net8.0\Application.Generated
 D:\DOT NET\Project\MobileMend\Application\obj\Debug\net8.0\Application.AssemblyInfoInputs.cache
 D:\DOT NET\Project\MobileMend\Application\obj\Debug\net8.0\Application.AssemblyInfo.cs
 D:\DOT NET\Project\MobileMend\Application\obj\Debug\net8.0\Application.csproj.CoreCompileInputs.cache
-D:\DOT NET\Project\MobileMend\Application\obj\Debug\net8.0\Application.sourcelink.json
 D:\DOT NET\Project\MobileMend\Application\obj\Debug\net8.0\Applicat.44B5EDA2.Up2Date
 D:\DOT NET\Project\MobileMend\Application\obj\Debug\net8.0\Application.dll
 D:\DOT NET\Project\MobileMend\Application\obj\Debug\net8.0\refint\Application.dll

@@ -8,7 +8,6 @@ D:\DOT NET\Project\MobileMend\Common\obj\Debug\net8.0\Common.GeneratedMSBuildEdi
 D:\DOT NET\Project\MobileMend\Common\obj\Debug\net8.0\Common.AssemblyInfoInputs.cache
 D:\DOT NET\Project\MobileMend\Common\obj\Debug\net8.0\Common.AssemblyInfo.cs
 D:\DOT NET\Project\MobileMend\Common\obj\Debug\net8.0\Common.csproj.CoreCompileInputs.cache
-D:\DOT NET\Project\MobileMend\Common\obj\Debug\net8.0\Common.sourcelink.json
 D:\DOT NET\Project\MobileMend\Common\obj\Debug\net8.0\Common.csproj.Up2Date
 D:\DOT NET\Project\MobileMend\Common\obj\Debug\net8.0\Common.dll
 D:\DOT NET\Project\MobileMend\Common\obj\Debug\net8.0\refint\Common.dll
