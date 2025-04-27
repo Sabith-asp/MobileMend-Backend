@@ -194,12 +194,18 @@
   },
   {
     "ContainingType": "API.Controllers.BookingController",
-    "Method": "SecureData",
-    "RelativePath": "api/Booking/secure-data",
-    "HttpMethod": "GET",
+    "Method": "UpdatePayment",
+    "RelativePath": "api/Booking/update-payment",
+    "HttpMethod": "PATCH",
     "IsController": true,
     "Order": 0,
-    "Parameters": [],
+    "Parameters": [
+      {
+        "Name": "bookingId",
+        "Type": "System.Guid",
+        "IsRequired": false
+      }
+    ],
     "ReturnTypes": []
   },
   {
@@ -530,6 +536,22 @@
       {
         "Name": "search",
         "Type": "System.String",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "MobileMend.API.Controllers.TechnicianController",
+    "Method": "NotifySparesPayment",
+    "RelativePath": "api/Technician/notify-spare-payment",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "bookingId",
+        "Type": "System.Guid",
         "IsRequired": false
       }
     ],

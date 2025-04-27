@@ -79,6 +79,7 @@ namespace MobileMend.API.Controllers
             }
             return Ok(new
             {
+                Id=UserId,
                 Name = name,
                 Role = role
             });

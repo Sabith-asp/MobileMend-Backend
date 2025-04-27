@@ -18,33 +18,32 @@ namespace API.Controllers
         
             bookingService = _bookingService;
         }
+        [Authorize(Roles = "User")]
         [HttpPost("confirm-booking")]
         public async Task<IActionResult> BookService(BookingCreateDTO newbooking) {
         var response=await bookingService.BookService(UserId,newbooking);
             return StatusCode(response.StatusCode, response);
         }
-        [Authorize]
+        [Authorize(Roles = "Admin,Technician,User")]
         [HttpGet("get-booking")]
         public async Task<IActionResult> GetBooking(Guid? bookingId, ServiceStatus? status,Guid? technicianId,string? searchString) {
             var response= await bookingService.GetBooking(UserId,Role, bookingId, status, technicianId, searchString);
             return StatusCode(response.StatusCode, response);
         }
-        [Authorize]
-        [HttpGet("secure-data")]
-        public IActionResult SecureData()
-        {
-            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            Console.WriteLine(userId);
-            return Ok($"Hello user {userId}");
-        }
 
+        [Authorize(Roles = "User")]
         [HttpGet("get-booking-estimate")]
         public async Task<IActionResult> GetBookingEstimate(Guid technicianId,Guid addressId,Guid serviceId)
         {
             var response = await bookingService.GetBookingEstimate(technicianId, addressId, serviceId);
             return StatusCode(response.StatusCode, response);
         }
-
-
+        [Authorize(Roles = "User")]
+        [HttpPatch("update-payment")]
+        public async Task<IActionResult> UpdatePayment(Guid bookingId)
+        {
+            var response = await bookingService.UpdatePayment(bookingId);
+            return StatusCode(response.StatusCode, response);
+        }
     }
 }

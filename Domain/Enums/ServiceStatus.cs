@@ -12,6 +12,7 @@ namespace Domain.Enums
         InProgress,
         Accepted,
         Rejected,
+        Reassigned,
         Reached,
         Started,
         Completed

@@ -1,5 +1,6 @@
 ﻿using API.Controllers.Base;
 using Application.DTOs;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using MobileMend.Application.DTOs;
@@ -16,7 +17,6 @@ namespace MobileMend.API.Controllers
         {
             deviceService = _deviceservice;
         }
-
         [HttpGet("get-device")]
         public async Task<IActionResult> GetDevice(string? search, Guid? deviceId)
         {
@@ -28,6 +28,7 @@ namespace MobileMend.API.Controllers
             var response = await deviceService.GetDevice(isAdmin, filter);
             return StatusCode(response.StatusCode, response);
         }
+        [Authorize(Roles = "Admin")]
 
         [HttpPost("add-device")]
         public async Task<IActionResult> AddDevice(DeviceCreateDTO newdevice)
@@ -35,6 +36,7 @@ namespace MobileMend.API.Controllers
             var response= await deviceService.AddDevice(newdevice);
             return StatusCode(response.StatusCode, response);
         }
+        [Authorize(Roles = "Admin")]
 
         [HttpPut("update-device")]
         public async Task<IActionResult> UpdateDevice(DeviceCreateDTO newdevice)
@@ -42,6 +44,7 @@ namespace MobileMend.API.Controllers
             var response = await deviceService.UpdateDevice(newdevice.deviceid, newdevice);
             return StatusCode(response.StatusCode, response);
         }
+        [Authorize(Roles = "Admin")]
 
         [HttpDelete("delete-device")]
         public async Task<IActionResult> DeleteDevice(Guid deviceid)

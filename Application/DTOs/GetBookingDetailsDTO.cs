@@ -12,6 +12,7 @@ namespace Application.DTOs
       
             public Guid BookingID { get; set; }
         public Guid TechnicianID { get; set; }
+        public Guid CustomerID { get; set; }
         public string CustomerName { get; set; }
             public string Email { get; set; }
             public string Phone { get; set; }

@@ -9,7 +9,7 @@ namespace Application.Interfaces.Services
 {
     public interface INotificationService
     {
-        Task NotifyTechnician(string technicianId,GetBookingDetailsDTO message);
-        Task NotifyCustomer(string technicianId, string message);
+        Task NotifyTechnician(string technicianId, NofityBookingToTechncianDTO message);
+        Task NotifyCustomer(string technicianId, NotifySparesPaymentDTO message);
     }
 }

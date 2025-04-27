@@ -27,8 +27,7 @@ namespace MobileMend.Application.Interfaces.Repositories
         Task<IEnumerable<TechnicianDTO>> GetBestTechnician(Guid customerAddressId, Guid deviceId);
         Task<int> UpdateRoleToTechnician(Guid userid);
 
-        Task<TechnicianAssignmentResult> FindTechnician(Guid addressID, Guid deviceID);
-
+        Task<TechnicianAssignmentResult> FindTechnician(Guid addressID, Guid deviceID, IEnumerable<Guid>? alreadyAssigned = null);
         Task<Guid> GetTechnicianIdByUserId(string Userid);
 
         Task<int> UpdateCurrentLocation(UpdateCurrentLocationDTO currentLocation);
@@ -39,6 +38,8 @@ namespace MobileMend.Application.Interfaces.Repositories
         Task<int> RemoveTechnician(Guid technicianId);
 
         Task<TechnicianDashboardDataDTO> GetTechnicianDashboardData(Guid technicianId);
-        Task<IEnumerable<TechnicianRevenueChartDataDTO>> GetMonthlyRevenueAndBookings();
+        Task<IEnumerable<TechnicianRevenueChartDataDTO>> GetMonthlyRevenueAndBookings(Guid technicianId);
+
+        Task<Guid> ReassignTechnician(Guid bookingId);
     }
 }

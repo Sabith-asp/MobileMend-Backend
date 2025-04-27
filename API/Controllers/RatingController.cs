@@ -1,6 +1,7 @@
 ﻿using Application.DTOs;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -12,6 +13,7 @@ namespace API.Controllers
     {
         private readonly IRatingService ratingService;
         public RatingController(IRatingService _ratingService) { ratingService = _ratingService; }
+        [Authorize(Roles = "User")]
 
         [HttpPost("add")]
         public async Task<IActionResult> AddRating(RatingCreateDTO newrating) {
@@ -20,7 +22,7 @@ namespace API.Controllers
             return StatusCode(response.StatusCode, response);
         }
 
-
+        [Authorize(Roles = "Admin")]
         [HttpDelete("hide")]
         public async Task<IActionResult> HideReview(Guid reviewId)
         {

@@ -35,7 +35,8 @@ namespace Application.Services
             {
                 File = new FileDescription(file.FileName, stream),
                 Folder = folderName,
-                PublicId = Path.GetFileNameWithoutExtension(file.FileName)
+                PublicId = Path.GetFileNameWithoutExtension(file.FileName),
+                Type = "upload"
             };
 
             var result = await _cloudinary.UploadAsync(uploadParams);

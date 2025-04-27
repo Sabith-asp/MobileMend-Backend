@@ -15,5 +15,6 @@ namespace Application.Interfaces.Services
         Task<ResponseDTO<object>> BookService(string userId,BookingCreateDTO newbooking);
         Task<ResponseDTO<object>> GetBooking(string? userId,string? Role, Guid? bookingId, ServiceStatus? status, Guid? technicianId, string? searchString);
         Task<ResponseDTO<object>> GetBookingEstimate(Guid technicianId, Guid addressId,Guid serviceId);
+        Task<ResponseDTO<object>> UpdatePayment(Guid bookingId);
     }
 }

@@ -18,7 +18,7 @@ namespace Application.Services
         {
             _hubContext = hubContext;
         }
-        public async Task NotifyTechnician(string technicianId, GetBookingDetailsDTO message)
+        public async Task NotifyTechnician(string technicianId, NofityBookingToTechncianDTO message)
         {
             if (NotificationHub._connections.TryGetValue(technicianId, out var connectionId))
             {
@@ -27,8 +27,17 @@ namespace Application.Services
         }
 
 
-        public async Task NotifyCustomer(string customerId, string message) {
-            await _hubContext.Clients.User(customerId).SendAsync("ReceiveNotification", message);
+        public async Task NotifyCustomer(string customerId, NotifySparesPaymentDTO message)
+        {
+            if (NotificationHub._connections.TryGetValue(customerId, out var connectionId))
+            {
+                await _hubContext.Clients.Client(connectionId).SendAsync("ReceiveNotification", message);
+            }
+            else
+            {
+                Console.WriteLine($"Customer {customerId} not connected.");
+            }
         }
+
     }
 }

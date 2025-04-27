@@ -8,7 +8,7 @@ namespace Application.DTOs
 {
     public class TechnicianDashboardDataDTO
     {
-        public double TotalRevenue { get; set; }
+        public double? TotalRevenue { get; set; }
 
         public TechnicianServiceCountsDTO TechnicianServiceCounts { get; set; }
 

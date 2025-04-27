@@ -29,5 +29,7 @@ namespace Application.Interfaces.Repositories
 
         Task<IEnumerable<GetBookingDetailsDTO>> GetBookingsByTechnicianIdAndStatus(Guid? technicianId, ServiceStatus? status);
         Task<IEnumerable<GetBookingDetailsDTO>> GetBookingsInProgress(Guid? technicianId, ServiceStatus? status, string? searchString);
+
+        Task<int> UpdatePayment(Guid bookingId);
     }
 }

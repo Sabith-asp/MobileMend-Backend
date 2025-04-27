@@ -26,7 +26,22 @@ namespace Infrastructure.Repositories
         {
             Guid bookingId = Guid.NewGuid();
             var serviceChargeQuery = "select Price from Services where serviceid=@ServiceID";
-            var bookingquery = @"INSERT INTO Bookings (BookingID, Email,Issue, CustomerName, Phone,AddressID, CustomerID, DeviceID, ServiceID,TechnicianID,PaymentStatus)VALUES (@BookingID,@Email,@Issue,@CustomerName,@Phone,@AddressID,@CustomerID,@DeviceID,@ServiceID,@TechnicianID,'BookingPaid')";
+            var bookingQuery = @"
+INSERT INTO Bookings (BookingID, Email, Issue, CustomerName, Phone, AddressID, CustomerID, DeviceID, ServiceID, TechnicianID, PaymentStatus)
+SELECT 
+    @BookingID,
+    u.Email,
+    @Issue,
+    u.Name,
+    u.Phone,
+    @AddressID,
+    u.UserID,
+    @DeviceID,
+    @ServiceID,
+    @TechnicianID,
+    'BookingPaid'
+FROM Users u
+WHERE u.UserID = @UserID";
 
             var bookingPriceAddingQuery = @"INSERT INTO BookingPricing (BookingPricingID, BookingID, BookingCharge, TravelAllowance, ServiceCharge,DistanceInKm) VALUES (UUID(),@BookingID,@BookingCharge,@TravelAllowance,@ServiceCharge,@DistanceInKm)";
 
@@ -35,9 +50,9 @@ namespace Infrastructure.Repositories
             using var transaction = connection.BeginTransaction();
 
             try {
-                var servicecharge = await connection.QueryFirstOrDefaultAsync<double>(serviceChargeQuery, new { ServiceID = newbooking.ServiceID });
+                var servicecharge = await connection.QueryFirstOrDefaultAsync<double>(serviceChargeQuery, new { ServiceID = newbooking.ServiceID }, transaction);
                 Console.WriteLine(servicecharge);
-                await connection.ExecuteAsync(bookingquery, new { BookingID = bookingId, Email = newbooking.Email, Issue = newbooking.Issue, CustomerName = newbooking.CustomerName, Phone = newbooking.Phone, AddressID = newbooking.AddressID, CustomerID= userId, DeviceID = newbooking.DeviceID, ServiceID = newbooking.ServiceID, TechnicianID = technicianid }, transaction);
+                await connection.ExecuteAsync(bookingQuery, new { BookingID = bookingId, Issue = newbooking.Issue, AddressID = newbooking.AddressID, CustomerID= userId, DeviceID = newbooking.DeviceID, ServiceID = newbooking.ServiceID, TechnicianID = technicianid,UserID= userId }, transaction);
 
                 var rowsaffected = await connection.ExecuteAsync(bookingPriceAddingQuery, new { BookingID = bookingId, BookingCharge = bookingCharge, TravelAllowance = travelAllowance, ServiceCharge = servicecharge, DistanceInKm = distance }, transaction);
                 Console.WriteLine(rowsaffected);
@@ -116,7 +131,7 @@ namespace Infrastructure.Repositories
         public async Task<IEnumerable<GetBookingDetailsDTO>> GetAllBookings(string? searchString) {
 
             var sql = @"
-SELECT b.bookingid, b.customername, b.email, b.phone, b.issue, b.bookingstatus,
+SELECT b.bookingid, b.customername,b.CustomerID, b.email, b.phone, b.issue, b.bookingstatus,
        b.paymentstatus, b.createdat, a.street, a.city, a.pincode,
        d.devicename, d.devicetype, s.servicename,
        u.name AS technicianName, u.phone AS technicianPhone,t.technicianId
@@ -158,7 +173,7 @@ WHERE (@SearchString IS NULL OR
 
         public async Task<IEnumerable<GetBookingDetailsDTO>> GetBookingsByUserID(string? userId)
         {
-            var sql = @"select b.bookingid,b.customername,b.email,b.phone,b.issue,b.bookingstatus,b.paymentstatus,b.createdat,a.street,a.city,a.pincode,d.devicename,d.devicetype,s.servicename,u.name as technicianName,u.phone as technicianPhone,t.technicianId  from 
+            var sql = @"select b.bookingid,b.customername,b.CustomerID,b.email,b.phone,b.issue,b.bookingstatus,b.paymentstatus,b.createdat,a.street,a.city,a.pincode,d.devicename,d.devicetype,s.servicename,u.name as technicianName,u.phone as technicianPhone,t.technicianId  from 
 Bookings b join 
 Addresses a on b.addressid=a.addressid join 
 Devices d on d.deviceid=b.deviceid join 
@@ -188,7 +203,7 @@ Users u on t.userid=u.userid where b.customerid=@UserID";
 
         public async Task<GetBookingDetailsDTO> GetBookingByID(Guid? bookingId)
         {
-            var sql = @"select b.bookingid,b.customername,b.email,b.phone,b.issue,b.bookingstatus,b.paymentstatus,b.createdat,a.street,a.city,a.pincode,d.devicename,d.devicetype,s.servicename,u.name as technicianName,u.phone as technicianPhone,t.technicianId  from Bookings b join 
+            var sql = @"select b.bookingid,b.customername,b.CustomerID,b.email,b.phone,b.issue,b.bookingstatus,b.paymentstatus,b.createdat,a.street,a.city,a.pincode,d.devicename,d.devicetype,s.servicename,u.name as technicianName,u.phone as technicianPhone,t.technicianId  from Bookings b join 
 Addresses a on b.addressid=a.addressid join 
 Devices d on d.deviceid=b.deviceid join 
 Services s on s.serviceid=b.serviceid join 
@@ -201,6 +216,7 @@ Users u on t.userid=u.userid  where b.bookingid=@BookingID";
             var spares=await connection.QueryAsync<GetSpareDTO>(spareQuery, new { BookingID = bookingId });
             var bookingresult= await connection.QueryFirstOrDefaultAsync<GetBookingDetailsDTO>(sql, new { BookingID = bookingId });
             bookingresult.Spares = spares;
+            bookingresult.SparesTotal = spares.Sum(x => x.TotalCost);
             if (bookingresult.BookingStatus == "Completed")
             {
                 var customerRatingQuery = @"select rating from Ratings where bookingid = @BookingID";
@@ -216,7 +232,7 @@ Users u on t.userid=u.userid  where b.bookingid=@BookingID";
 
         public async Task<IEnumerable<GetBookingDetailsDTO>> GetBookingsByStatus(ServiceStatus? status,string? searchString)
         {
-            var sql = @"select b.bookingid,b.customername,b.email,b.phone,b.issue,b.bookingstatus,b.paymentstatus,b.createdat,a.street,a.city,a.pincode,d.devicename,d.devicetype,s.servicename,u.name as technicianName,u.phone as technicianPhone,t.technicianId  from Bookings b join 
+            var sql = @"select b.bookingid,b.customername,b.CustomerID,b.email,b.phone,b.issue,b.bookingstatus,b.paymentstatus,b.createdat,a.street,a.city,a.pincode,d.devicename,d.devicetype,s.servicename,u.name as technicianName,u.phone as technicianPhone,t.technicianId  from Bookings b join 
 Addresses a on b.addressid=a.addressid join 
 Devices d on d.deviceid=b.deviceid join 
 Services s on s.serviceid=b.serviceid join 
@@ -283,7 +299,7 @@ Users u on t.userid=u.userid  where b.bookingstatus=@Status and (@SearchString I
             if (status == ServiceStatus.InProgress)
             {
                 sql = @"
-            SELECT b.bookingid, b.customername, b.email, b.phone, b.issue, b.bookingstatus, b.paymentstatus, b.createdat,
+            SELECT b.bookingid, b.customername,b.CustomerID, b.email, b.phone, b.issue, b.bookingstatus, b.paymentstatus, b.createdat,
                    a.street, a.city, a.pincode, d.devicename, d.devicetype, s.servicename, u.name AS technicianName, 
                    u.phone AS technicianPhone, t.technicianId 
             FROM Bookings b 
@@ -293,12 +309,27 @@ Users u on t.userid=u.userid  where b.bookingstatus=@Status and (@SearchString I
             JOIN Technicians t ON t.technicianid = b.technicianid 
             JOIN Users u ON t.userid = u.userid 
             WHERE b.technicianid = @TechnicianId 
-              AND b.bookingstatus NOT IN ('Completed', 'Rejected', 'Assigned')";
+              AND b.bookingstatus NOT IN ('Completed', 'Rejected', 'Assigned','Reassigned')";
+            }
+            else if (status == ServiceStatus.Assigned)
+            {
+                sql = @"
+        SELECT b.bookingid, b.customername,b.CustomerID, b.email, b.phone, b.issue, b.bookingstatus, b.paymentstatus, b.createdat,
+               a.street, a.city, a.pincode, d.devicename, d.devicetype, s.servicename, u.name AS technicianName, 
+               u.phone AS technicianPhone, t.technicianId 
+        FROM Bookings b 
+        JOIN Addresses a ON b.addressid = a.addressid 
+        JOIN Devices d ON d.deviceid = b.deviceid 
+        JOIN Services s ON s.serviceid = b.serviceid 
+        JOIN Technicians t ON t.technicianid = b.technicianid 
+        JOIN Users u ON t.userid = u.userid 
+        WHERE b.bookingstatus IN ('Assigned', 'Reassigned') 
+          AND b.technicianid = @TechnicianId";
             }
             else
             {
                 sql = @"
-            SELECT b.bookingid, b.customername, b.email, b.phone, b.issue, b.bookingstatus, b.paymentstatus, b.createdat,
+            SELECT b.bookingid, b.customername,b.CustomerID, b.email, b.phone, b.issue, b.bookingstatus, b.paymentstatus, b.createdat,
                    a.street, a.city, a.pincode, d.devicename, d.devicetype, s.servicename, u.name AS technicianName, 
                    u.phone AS technicianPhone, t.technicianId 
             FROM Bookings b 
@@ -336,7 +367,7 @@ Users u on t.userid=u.userid  where b.bookingstatus=@Status and (@SearchString I
 
         public async Task<IEnumerable<GetBookingDetailsDTO>> GetBookingsInProgress(Guid? technicianId, ServiceStatus? status, string? searchString) {
             var sql = @"
-        SELECT b.bookingid, b.customername, b.email, b.phone, b.issue, b.bookingstatus, b.paymentstatus, b.createdat,
+        SELECT b.bookingid, b.customername,b.CustomerID, b.email, b.phone, b.issue, b.bookingstatus, b.paymentstatus, b.createdat,
                a.street, a.city, a.pincode,
                d.devicename, d.devicetype,
                s.servicename,
@@ -347,7 +378,7 @@ Users u on t.userid=u.userid  where b.bookingstatus=@Status and (@SearchString I
         JOIN Services s ON s.serviceid = b.serviceid
         JOIN Technicians t ON t.technicianid = b.technicianid
         JOIN Users u ON t.userid = u.userid
-        WHERE b.bookingstatus NOT IN ('Completed', 'Assigned','Rejected')
+        WHERE b.bookingstatus NOT IN ('Completed', 'Assigned','Rejected','Reassigned')
   AND (@SearchString IS NULL OR 
        d.devicename LIKE CONCAT('%', @SearchString, '%') OR 
        b.customername LIKE CONCAT('%', @SearchString, '%') OR 
@@ -376,7 +407,16 @@ Users u on t.userid=u.userid  where b.bookingstatus=@Status and (@SearchString I
                 booking.bookingCostDetails = bookingCost;
             }
             return bookingresults;
-        }   
+        }
+
+
+
+        public async Task<int> UpdatePayment(Guid bookingId) {
+            var sql = "update Bookings set PaymentStatus='Paid' where BookingId=@BookingId";
+            using var connection = context.CreateConnection();
+            return await connection.ExecuteAsync(sql, new { BookingId = bookingId });
+
+        }
     }
 
 }

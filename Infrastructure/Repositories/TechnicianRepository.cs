@@ -87,8 +87,8 @@ ORDER BY t.RequestDate DESC;
             connection.Open();
             using var transaction= connection.BeginTransaction();
             try {
-                await connection.ExecuteAsync(sql, new { TechnicianRequestID = technicianRequestId });
-                var rowsaffected = await connection.ExecuteAsync(updateRoleQuery, new { TechnicianRequestID = technicianRequestId });
+                await connection.ExecuteAsync(sql, new { TechnicianRequestID = technicianRequestId }, transaction);
+                var rowsaffected = await connection.ExecuteAsync(updateRoleQuery, new { TechnicianRequestID = technicianRequestId }, transaction);
                 transaction.Commit();
                 return rowsaffected;
             } catch (Exception ex) { 
@@ -119,14 +119,14 @@ ORDER BY t.RequestDate DESC;
 
             try {
                 if (statusdata.Status) {
-                    await connection.ExecuteAsync(updatePendingJobsQuery, new { TechnicianID = TechnicianID });
+                    await connection.ExecuteAsync(updatePendingJobsQuery, new { TechnicianID = TechnicianID }, transaction);
                 }
 
-                await connection.ExecuteAsync(updateDesicionQuery, new { BookingStatus = technicianDecision, BookingID = statusdata.BookingID });
+                await connection.ExecuteAsync(updateDesicionQuery, new { BookingStatus = technicianDecision, BookingID = statusdata.BookingID }, transaction);
 
 
 
-                var rowsaffected = await connection.ExecuteAsync(addToActionTableQuery, new { BookingID = statusdata.BookingID, TechnicianID = TechnicianID, Reason = statusdata.Status ? null : statusdata.RejectionReason, Desicion = statusdata.Status });
+                var rowsaffected = await connection.ExecuteAsync(addToActionTableQuery, new { BookingID = statusdata.BookingID, TechnicianID = TechnicianID, Reason = statusdata.Status ? null : statusdata.RejectionReason, Desicion = statusdata.Status }, transaction);
                 Console.WriteLine(rowsaffected);
                 transaction.Commit();
                 return rowsaffected;
@@ -153,17 +153,17 @@ ORDER BY t.RequestDate DESC;
         {
             Console.WriteLine(status);
             var sql = "update Bookings set BookingStatus=@Status,UpdatedAt=NOW(),UpdatedBy=@TechnicianID where BookingID=@BookingID";
-            var pendingJobDecrementQuery = "update Technicians set pendingjobs=pendingjobs-1 where technicianid=@TechnicianID";
+            var jobCountUpdateQuery = "update Technicians set pendingjobs=pendingjobs-1,CompletedJobs=CompletedJobs+1 where technicianid=@TechnicianID";
             using var connection = context.CreateConnection();
             connection.Open();
             using var transaction = connection.BeginTransaction();
             try {
                 if (status.ToString() == "Completed") {
-                    await connection.ExecuteAsync(pendingJobDecrementQuery, new { TechnicianID = technicianId });
+                    await connection.ExecuteAsync(jobCountUpdateQuery, new { TechnicianID = technicianId }, transaction);
                 }
 
 
-                var rowsaffected = await connection.ExecuteAsync(sql, new { Status = status.ToString(), TechnicianID = technicianId, BookingID = bookingId });
+                var rowsaffected = await connection.ExecuteAsync(sql, new { Status = status.ToString(), TechnicianID = technicianId, BookingID = bookingId }, transaction);
                 transaction.Commit();
                 return rowsaffected;
             }
@@ -233,9 +233,8 @@ ORDER BY t.RequestDate DESC;
         }
 
 
-        public async Task<TechnicianAssignmentResult> FindTechnician(Guid addressID, Guid deviceID)
+        public async Task<TechnicianAssignmentResult> FindTechnician(Guid addressID, Guid deviceID, IEnumerable<Guid>? alreadyAssigned = null)
         {
-
             var sql = @"
     SELECT TechnicianID, PendingJobs, Distance_Km FROM (
         SELECT 
@@ -259,14 +258,30 @@ ORDER BY t.RequestDate DESC;
             t.IsBlocked = FALSE AND
             t.IsDeleted = FALSE AND 
             t.PendingJobs < 4 AND 
-            t.Specialization LIKE CONCAT('%', d.DeviceType, '%')
+            t.Specialization LIKE CONCAT('%', d.DeviceType, '%')";
+
+            if (alreadyAssigned != null && alreadyAssigned.Any())
+            {
+                sql += " AND t.TechnicianID NOT IN @AlreadyAssigned";
+            }
+
+            sql += @"
     ) AS nearest
     WHERE nearest.distance_km <= 15
     ORDER BY distance_km ASC, PendingJobs ASC
     LIMIT 1";
+
+            var parameters = new
+            {
+                DeviceID = deviceID,
+                AddressID = addressID,
+                AlreadyAssigned = alreadyAssigned?.ToArray()
+            };
+
             using var connection = context.CreateConnection();
-            return await connection.QueryFirstOrDefaultAsync<TechnicianAssignmentResult>(sql, new { DeviceID = deviceID, AddressID = addressID });
+            return await connection.QueryFirstOrDefaultAsync<TechnicianAssignmentResult>(sql, parameters);
         }
+
 
 
         public async Task<Guid> GetTechnicianIdByUserId(string Userid) {
@@ -277,7 +292,7 @@ ORDER BY t.RequestDate DESC;
 
 
         public async Task<int> UpdateCurrentLocation(UpdateCurrentLocationDTO currentLocation) {
-            var sql = "update Technicians set CurrentLatitude=@Latitude ,CurrentLongitude=@Longitude where technicianid=@TechnicianID";
+            var sql = "update Technicians set CurrentLatitude=@Latitude ,CurrentLongitude=@Longitude,LastLocationUpdated=NOW() where technicianid=@TechnicianID";
             using var connection = context.CreateConnection();
             var rowsaffected = await connection.ExecuteAsync(sql, new { Latitude=currentLocation.Latitude,Longitude=currentLocation.Longitude,TechnicianID=currentLocation.TechnicianId });
             return rowsaffected;
@@ -348,16 +363,16 @@ WHERE
             using var transaction= connection.BeginTransaction();
             try
             {
-                // Query for TotalRevenue (60% of serviceCharge from bookingPricing)
                 var totalRevenueQuery = @"
                         SELECT SUM(serviceCharge * 0.60) AS TotalRevenue
                         FROM BookingPricing
                         WHERE bookingId IN (SELECT bookingId FROM Bookings WHERE technicianid = @TechnicianId)"
                 ;
 
-                var totalRevenue = await connection.QueryFirstOrDefaultAsync<double>(totalRevenueQuery, new { TechnicianId = technicianId }, transaction);
-
-                // Query for Assigned Count
+                var totalRevenue = await connection.QueryFirstOrDefaultAsync<double?>(totalRevenueQuery, new { TechnicianId = technicianId }, transaction);
+                if (totalRevenue == null) { 
+                    totalRevenue=0;
+                }
                 var assignedQuery = @"
                         SELECT COUNT(*) 
                         FROM Bookings 
@@ -366,16 +381,14 @@ WHERE
 
                 var assigned = await connection.QueryFirstOrDefaultAsync<int>(assignedQuery, new { TechnicianId = technicianId }, transaction);
 
-                // Query for InProgress Count
                 var inProgressQuery = @"
                         SELECT COUNT(*) 
                         FROM Bookings 
-                        WHERE bookingStatus NOT IN ('Assigned', 'Rejected', 'Completed') AND technicianid = @TechnicianId"
+                        WHERE bookingStatus NOT IN ('Assigned', 'Rejected', 'Completed','Reassigned') AND technicianid = @TechnicianId"
                 ;
 
                 var inProgress = await connection.QueryFirstOrDefaultAsync<int>(inProgressQuery, new { TechnicianId = technicianId }, transaction);
 
-                // Query for Completed Count
                 var completedQuery = @"
                         SELECT COUNT(*) 
                         FROM Bookings 
@@ -384,10 +397,8 @@ WHERE
 
                 var completed = await connection.QueryFirstOrDefaultAsync<int>(completedQuery, new { TechnicianId = technicianId }, transaction);
 
-                // Commit the transaction if all queries were successful
                 transaction.Commit();
 
-                // Create and return the DTO
                 return new TechnicianDashboardDataDTO
                 {
                     TotalRevenue = totalRevenue,
@@ -401,34 +412,60 @@ WHERE
             }
             catch (Exception)
             {
-                // Rollback the transaction if any query fails
                 transaction.Rollback();
-                throw; // Rethrow the exception so it can be handled at a higher level
+                throw; 
             }
         }
 
 
-        public async Task<IEnumerable<TechnicianRevenueChartDataDTO>> GetMonthlyRevenueAndBookings()
+        public async Task<IEnumerable<TechnicianRevenueChartDataDTO>> GetMonthlyRevenueAndBookings(Guid technicianId)
         {
             var sql = @"
             SELECT 
         MONTHNAME(b.createdat) AS Month, 
         COUNT(b.bookingid) AS Bookings, 
-        SUM(bp.serviceCharge * 0.6) AS Revenue
-    FROM Bookings b
+        COALESCE(SUM(bp.serviceCharge * 0.6), 0) AS Revenue
+    FROM Bookings  b 
     JOIN BookingPricing bp ON b.bookingid = bp.bookingid
+    WHERE b.technicianId=@TechnicianId
     GROUP BY MONTH(b.createdat), MONTHNAME(b.createdat)
-    ORDER BY MONTH(b.createdat)"
+    ORDER BY MONTH(b.createdat) "
             ;
             using var connection = context.CreateConnection();
 
-            var chartData = await connection.QueryAsync<TechnicianRevenueChartDataDTO>(sql);
+            var chartData = await connection.QueryAsync<TechnicianRevenueChartDataDTO>(sql, new { TechnicianId =technicianId});
 
             return chartData;
         }
 
+        public async Task<Guid> ReassignTechnician(Guid bookingId) {
 
-       
+            var alreadyAssignedTechniciansQuery = @"select TechnicianID from ServiceRequestActions WHERE BookingID=@BookingId";
+            var bookingDetailQuery = @"select DeviceId,AddressId from Bookings where BookingId=@BookingId";
+            var updateBookingQuery = @"update Bookings set BookingStatus='Reassigned',TechnicianId=@TechnicianId WHERE BookingId=@BookingID";
+            using var connection = context.CreateConnection();
+            connection.Open();
+            using var transaction = connection.BeginTransaction();
+            try {
+                IEnumerable<Guid>? alreadyAssigned = await connection.QueryAsync<Guid>(alreadyAssignedTechniciansQuery, new { BookingId = bookingId });
+                var bookindDetailForReaasignment = await connection.QueryFirstOrDefaultAsync<BookingReassignmentDataDTO>(bookingDetailQuery, new { BookingId = bookingId });
+                TechnicianAssignmentResult newTechnician=await FindTechnician(bookindDetailForReaasignment.AddressId, bookindDetailForReaasignment.DeviceId, alreadyAssigned);
+                if (newTechnician == null)
+                {
+                    transaction.Rollback();
+                    throw new InvalidOperationException("No available technician found for reassignment.");
+                }
+                await connection.ExecuteAsync(updateBookingQuery, new { TechnicianId=newTechnician.TechnicianID, BookingID= bookingId });
+                transaction.Commit();
+                return newTechnician.TechnicianID;
+            } catch (Exception) { 
+                transaction.Rollback();
+                throw;
+            }
+
+        }
+
+
 
 
     }
