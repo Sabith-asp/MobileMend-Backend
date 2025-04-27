@@ -1,6 +1,7 @@
 ﻿using API.Controllers.Base;
 using Application.DTOs;
 using CloudinaryDotNet.Actions;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using MobileMend.Application.DTOs;
@@ -18,7 +19,6 @@ namespace MobileMend.API.Controllers
         {
             service = _service;
         }
-
         [HttpGet("get-service")]
         public async Task<IActionResult> GetService(string? search, Guid? serviceId)
         {       
@@ -33,6 +33,7 @@ namespace MobileMend.API.Controllers
         }
 
 
+        [Authorize(Roles = "Admin")]
 
         [HttpPost("add-service")]
         public async Task<IActionResult> AddService(ServiceCreateDTO newservice)
@@ -40,12 +41,13 @@ namespace MobileMend.API.Controllers
             var response = await service.AddService(newservice);
             return StatusCode(response.StatusCode, response);
         }
+        [Authorize(Roles = "Admin")]
         [HttpPut("update-service")]
         public async Task<IActionResult> UpdateService([FromBody]ServiceCreateDTO servicedata) { 
         var response= await service.UpdateService( servicedata);
             return StatusCode(response.StatusCode, response);
         }
-
+        [Authorize(Roles = "Admin")]
         [HttpDelete("delete-service")]
 
         public async Task<IActionResult> DeleteService(Guid serviceid) { 

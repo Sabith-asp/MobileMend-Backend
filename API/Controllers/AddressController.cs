@@ -16,21 +16,21 @@ namespace MobileMend.API.Controllers
         public AddressController(IAddressService _addressService) {
             addressService = _addressService;
         }
-        [Authorize]
+        [Authorize(Roles ="User")]
         [HttpPost("add-address")]
         public async Task<IActionResult> AddAddress(AddressCreateDTO newaddress)
         {
             var response = await addressService.AddAddress(UserId, newaddress);
             return StatusCode(response.StatusCode, response);
         }
-        [Authorize]
+        [Authorize(Roles = "User")]
         [HttpDelete("remove-address/{addressid}")]
         public async Task<IActionResult> RemoveAddress(Guid addressid)
         {
             var response = await addressService.RemoveAddress(addressid);
             return StatusCode(response.StatusCode, response);
         }
-        [Authorize]
+        [Authorize(Roles = "User")]
         [HttpGet("get-address")]
         public async Task<IActionResult> GetAddress()
         {

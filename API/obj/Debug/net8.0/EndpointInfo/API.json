@@ -266,18 +266,6 @@
         }
       }
     },
-    "/api/Booking/secure-data": {
-      "get": {
-        "tags": [
-          "Booking"
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        }
-      }
-    },
     "/api/Booking/get-booking-estimate": {
       "get": {
         "tags": [
@@ -302,6 +290,28 @@
           },
           {
             "name": "serviceId",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/Booking/update-payment": {
+      "patch": {
+        "tags": [
+          "Booking"
+        ],
+        "parameters": [
+          {
+            "name": "bookingId",
             "in": "query",
             "schema": {
               "type": "string",
@@ -1083,6 +1093,28 @@
           }
         }
       }
+    },
+    "/api/Technician/notify-spare-payment": {
+      "post": {
+        "tags": [
+          "Technician"
+        ],
+        "parameters": [
+          {
+            "name": "bookingId",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
     }
   },
   "components": {
@@ -1149,19 +1181,7 @@
             "type": "string",
             "format": "uuid"
           },
-          "email": {
-            "type": "string",
-            "nullable": true
-          },
-          "customerName": {
-            "type": "string",
-            "nullable": true
-          },
           "issue": {
-            "type": "string",
-            "nullable": true
-          },
-          "phone": {
             "type": "string",
             "nullable": true
           }
@@ -1339,6 +1359,7 @@
           "InProgress",
           "Accepted",
           "Rejected",
+          "Reassigned",
           "Reached",
           "Started",
           "Completed"

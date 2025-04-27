@@ -1,4 +1,5 @@
 ﻿using Application.DTOs;
+using Application.Interfaces.Repositories;
 using Application.Interfaces.Services;
 using Application.Services;
 using AutoMapper;
@@ -17,11 +18,13 @@ namespace MobileMend.Application.Services
         private readonly ITechnicianRepository technicianRepository;
         private readonly INotificationService notificationService;
         private readonly ICloudinaryService cloudinaryService;
-        public TechnicianService(ITechnicianRepository _technicianRepository, INotificationService _notificationService,ICloudinaryService _cloudinaryService,IMapper _mapper) {
+        private readonly IBookingRepository bookingRepository;
+        public TechnicianService(ITechnicianRepository _technicianRepository, INotificationService _notificationService,ICloudinaryService _cloudinaryService,IMapper _mapper,IBookingRepository _bookingRepository) {
             technicianRepository= _technicianRepository;
             notificationService= _notificationService;
             cloudinaryService = _cloudinaryService;
             mapper = _mapper;
+            bookingRepository = _bookingRepository;
         }
         public async Task<ResponseDTO<object>> TechnicianRequest(string userId, TechnicianRequestCreateDTO newrequest) {
             try
@@ -55,9 +58,10 @@ namespace MobileMend.Application.Services
             {
                 var approved = status ? "Approved" : "Rejected";
                 var result = await technicianRepository.UpdateRequestStatus(technicianRequestId,approved,adminRemarks);
-                if (approved == "Approved") {
+                if (approved == "Approved")
+                {
                     await technicianRepository.AddTechnician(technicianRequestId);
-                }
+                }   
                 if (result < 1) { 
                  return new ResponseDTO<object> { StatusCode = 400, Message = "Error in updating technician" };
                 }
@@ -103,15 +107,18 @@ namespace MobileMend.Application.Services
 
                 var result=await technicianRepository.UpdateServiceRequest(statusdata.TechnicianId, statusdata, technicianDecision);
 
-                var userid = await technicianRepository.GetUserIdByBookingID(statusdata.TechnicianId);
+                var userid = await technicianRepository.GetUserIdByBookingID(statusdata.BookingID);
                 if (result<1) {
                     return new ResponseDTO<object> { StatusCode = 400, Message = "Error in updating technician desicion" };
 
                 }
                 if (!statusdata.Status)
                 {
-                    //await notificationService.NotifyTechnician(userid.ToString(), "📲 your service rejected by technician");
-                    return new ResponseDTO<object> { StatusCode = 200, Message = "Service rejected by technician" };
+                    var newTechnician = await technicianRepository.ReassignTechnician(statusdata.BookingID);
+                    var bookingDetail = await bookingRepository.GetBookingByID(statusdata.BookingID);
+                    var bookingDetailForNotification = mapper.Map<NofityBookingToTechncianDTO>(bookingDetail);
+                    await notificationService.NotifyTechnician(newTechnician.ToString(), bookingDetailForNotification);
+                    return new ResponseDTO<object> { StatusCode = 200, Message = "Service rejected by technician and reassign to other technician" };
                 }
                 
                 //await notificationService.NotifyTechnician(userid.ToString(), "📲 your service accepted by technician");
@@ -133,15 +140,17 @@ namespace MobileMend.Application.Services
             {
 
                 var result=await technicianRepository.UpdateServiceStatus(technicianId,status, bookingId);
-
-                if (result < 1)
+                var bookingDetail = await bookingRepository.GetBookingByID(bookingId);
+                    if (result < 1)
                 {
                     return new ResponseDTO<object> { StatusCode = 400, Message = "Error in updating service status" };
 
                 }
                 if (status.ToString() == "Completed") {
                     var userid=await technicianRepository.GetUserIdByBookingID(bookingId);
-                    await notificationService.NotifyCustomer(userid.ToString(), "📲 your service completed. pay now");
+                }
+                if (status.ToString() == "Completed" && bookingDetail.SparesTotal == 0) {
+                    await bookingRepository.UpdatePayment(bookingId);
                 }
                
 
@@ -288,7 +297,7 @@ namespace MobileMend.Application.Services
                 var technicianId=await technicianRepository.GetTechnicianIdByUserId(userId);
 
                 var result = await technicianRepository.GetTechnicianDashboardData(technicianId);
-                var technicianChartData = await technicianRepository.GetMonthlyRevenueAndBookings();
+                var technicianChartData = await technicianRepository.GetMonthlyRevenueAndBookings(technicianId);
                 result.TechnicianRevenueChartData = technicianChartData;
 
                 return new ResponseDTO<TechnicianDashboardDataDTO> { StatusCode = 200, Message = "technician dashboard data retrieved", Data = result };
@@ -301,6 +310,22 @@ namespace MobileMend.Application.Services
         }
 
 
+        public async Task<ResponseDTO<object>> NotifySparesPayment(Guid bookingId)
+        {
+            try
+            {
+                var bookingDetails=await bookingRepository.GetBookingByID(bookingId);
+                var pay = new NotifySparesPaymentDTO { SparesTotal=bookingDetails.SparesTotal,BookingId= bookingId,Spares=bookingDetails.Spares };
+                await notificationService.NotifyCustomer(bookingDetails.CustomerID.ToString(), pay);
+
+                return new ResponseDTO<object> { StatusCode = 200, Message = "notified customer for spare payment"};
+            }
+            catch (Exception ex)
+            {
+                return new ResponseDTO<object> { StatusCode = 500, Error = ex.Message };
+
+            }
+        }
 
     }
 }

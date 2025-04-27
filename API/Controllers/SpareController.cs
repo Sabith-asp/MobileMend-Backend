@@ -1,6 +1,7 @@
 ﻿using Application.DTOs;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -15,12 +16,14 @@ namespace API.Controllers
         {
             spareService = _spareService;
         }
+        [Authorize(Roles = "Technician")]
         [HttpPost("add")]
         public async Task<IActionResult> AddSpare(SpareCreateDTO newspare)
         { 
             var response=await spareService.AddSpare(newspare, newspare.TechnicianID);
             return StatusCode(response.StatusCode, response);
         }
+        [Authorize]
         [HttpGet("spare-by-bookingId")]
         public async Task<IActionResult> GetSpareByBookingId(Guid bookingId)
         {

@@ -8,8 +8,8 @@ namespace MobileMend.Application.Interfaces.Services
 {
     public interface ITechnicianService
     {
-        Task<ResponseDTO<object>> TechnicianRequest(string userId,TechnicianRequestCreateDTO newrequest);
-        Task<ResponseDTO<object>> UpdateRequestStatus(Guid technicianRequestId,bool status, string? adminRemarks);
+        Task<ResponseDTO<object>> TechnicianRequest(string userId, TechnicianRequestCreateDTO newrequest);
+        Task<ResponseDTO<object>> UpdateRequestStatus(Guid technicianRequestId, bool status, string? adminRemarks);
         Task<ResponseDTO<IEnumerable<object>>> GetRequests(TechnicianRequestStatuses? status, string? search);
         Task<ResponseDTO<object>> UpdateServiceRequest(UpdateServiceRequestDTO statusdata);
 
@@ -27,6 +27,8 @@ namespace MobileMend.Application.Interfaces.Services
         Task<ResponseDTO<string>> ToggleTechnicianStatus(Guid technicianId);
 
         Task<ResponseDTO<TechnicianDashboardDataDTO>> GetTechnicianDashboardData(string userId);
+
+        Task<ResponseDTO<object>> NotifySparesPayment(Guid bookingId);
 
     }
 }

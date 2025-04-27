@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Application.DTOs;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Services;
+using AutoMapper;
 using Domain.Entities;
 using Domain.Enums;
 using MobileMend.Application.DTOs;
@@ -18,9 +19,11 @@ namespace Application.Services
     {
         private readonly IBookingRepository bookingRepository;
         private readonly INotificationService notificationService;
-        public BookingService(IBookingRepository _bookingRepository,INotificationService _notificationService ) {
+        private readonly IMapper mapper;
+        public BookingService(IBookingRepository _bookingRepository,INotificationService _notificationService,IMapper _mapper ) {
             bookingRepository = _bookingRepository;
             notificationService = _notificationService;
+            mapper= _mapper;
         }
         public int bookingcharge = 199;
         public int travelAllowancePerKm=20;
@@ -36,7 +39,8 @@ namespace Application.Services
 
                 }
                 var bookingDetails = await bookingRepository.GetBookingByID(bookingresult.BookingId);
-                await notificationService.NotifyTechnician(newbooking.TechnicianID.ToString(), bookingDetails);
+                var bookingDetailToNotifyTechnciian=mapper.Map<NofityBookingToTechncianDTO>(bookingDetails);
+                await notificationService.NotifyTechnician(newbooking.TechnicianID.ToString(), bookingDetailToNotifyTechnciian);
                 return new ResponseDTO<object> { StatusCode = 200, Message = "Service booked" };
 
 
@@ -57,24 +61,24 @@ namespace Application.Services
                 }
                
 
-                else if (technicianId != null && technicianId != Guid.Empty && status != null)
+                else if (technicianId != null && technicianId != Guid.Empty && status != null )
                 {
                     Console.WriteLine(technicianId);
                     var bookingsByTechnicianAndStatus = await bookingRepository.GetBookingsByTechnicianIdAndStatus(technicianId, status);
-                    return new ResponseDTO<object> { StatusCode = 200, Message = "Bookings by technician and status retrieved", Data = bookingsByTechnicianAndStatus };
+                    return new ResponseDTO<object> { StatusCode = 200, Message = "Bookings by technician and status retrieved", Data = bookingsByTechnicianAndStatus.OrderByDescending(data => data.CreatedAt) };
                 }
 
-                else if (status == ServiceStatus.InProgress)
+                else if (status == ServiceStatus.InProgress && Role=="Admin")
                 {
                     var bookingsByStatus = await bookingRepository.GetBookingsInProgress(technicianId, status, searchString);
-                    return new ResponseDTO<object> { StatusCode = 200, Message = "booking In Progress retrieved", Data = bookingsByStatus };
+                    return new ResponseDTO<object> { StatusCode = 200, Message = "booking In Progress retrieved", Data = bookingsByStatus.OrderByDescending(data => data.CreatedAt) };
                 }
 
                 else if (status != null)
                 {
 
                     var bookingsByStatus = await bookingRepository.GetBookingsByStatus(status, searchString);
-                    return new ResponseDTO<object> { StatusCode = 200, Message = "bookings by status retrieved", Data = bookingsByStatus };
+                    return new ResponseDTO<object> { StatusCode = 200, Message = "bookings by status retrieved", Data = bookingsByStatus.OrderByDescending(data => data.CreatedAt) };
                 }
                 else if (Role == "Admin")
                 {
@@ -85,7 +89,7 @@ namespace Application.Services
                 else if (userId != null)
                 {
                     var userBookings = await bookingRepository.GetBookingsByUserID(userId);
-                    return new ResponseDTO<object> { StatusCode = 200, Message = "user bookings retrieved", Data = userBookings };
+                    return new ResponseDTO<object> { StatusCode = 200, Message = "user bookings retrieved", Data = userBookings.OrderByDescending(data => data.CreatedAt) };
                 }
               
                 else {
@@ -120,7 +124,23 @@ namespace Application.Services
             }
         }
 
+        public async Task<ResponseDTO<object>> UpdatePayment(Guid bookingId)
+        {
+            try
+            {
+                var result=await bookingRepository.UpdatePayment(bookingId);
+                if (result < 1) {
+                    return new ResponseDTO<object> { StatusCode = 400, Message = "Payment is not updated" };
 
+                }
+                return new ResponseDTO<object> { StatusCode = 200, Message = "Payment is updated" };
+
+            }
+            catch (Exception ex)
+            {
+                return new ResponseDTO<object> { StatusCode = 500, Error = ex.Message };
+            }
+        }
 
     }
 }

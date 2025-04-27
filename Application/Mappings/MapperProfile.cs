@@ -13,6 +13,7 @@ namespace MobileMend.Application.Mappings
             CreateMap<Device, DeviceDTO>().ReverseMap();
             CreateMap<Address, AddressDTO>().ReverseMap();
             CreateMap<TechnicianRequestCreateDTO, TechncianRequestAddDTO>();
+            CreateMap<GetBookingDetailsDTO, NofityBookingToTechncianDTO>();
         }
     }
 }
