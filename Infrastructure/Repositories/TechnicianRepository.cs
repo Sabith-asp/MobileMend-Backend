@@ -1,5 +1,7 @@
 ﻿using System.Data.Common;
+using System.Reflection.Metadata;
 using System.Transactions;
+using System.Xml.Linq;
 using Application.DTOs;
 using Dapper;
 using Domain.Entities;
@@ -15,14 +17,16 @@ namespace MobileMend.Infrastructure.Repositories
     {
         private readonly DapperContext context;
         public TechnicianRepository(DapperContext _context) { context = _context; }
-        public async Task<int> TechnicianRequest(TechncianRequestAddDTO newrequest) {
-            var sql = "insert into TechnicianRequests (TechnicianRequestID,UserID,Experience,ResumeUrl,Specialization,Bio,Longitude,Latitude,Place) values (UUID(),@UserID,@Experience,@ResumeUrl,@Specialization,@Bio,@Longitude,@Latitude,@Place)";
+        public async Task<int> TechnicianRequest(TechncianRequestAddDTO newrequest)
+        {
+            var sql = "insert into TechnicianRequests (TechnicianRequestID,UserID,Experience,Specialization,Bio,Longitude,Latitude,Place,DocumentId,ResumeUrl) values (UUID(),@UserID,@Experience,@Specialization,@Bio,@Longitude,@Latitude,@Place,@DocumentId,'Url')";
             using var connection = context.CreateConnection();
-            var rowsaffected = await connection.ExecuteAsync(sql, new { UserID = newrequest.UserID, Experience = newrequest.Experience, ResumeUrl = newrequest.Resume, Specialization = newrequest.Specialization, Bio = newrequest.Bio, Longitude = newrequest.Longitude, Latitude = newrequest.Latitude,Place=newrequest.Place });
+            var rowsaffected = await connection.ExecuteAsync(sql, new { UserID = newrequest.UserID, Experience = newrequest.Experience, Specialization = newrequest.Specialization, Bio = newrequest.Bio, Longitude = newrequest.Longitude, Latitude = newrequest.Latitude, Place = newrequest.Place, DocumentId=newrequest.DocumentId });
             return rowsaffected;
         }
 
-        public async Task<TechnicianRequest> CheckAlreadyRequested(string userid) {
+        public async Task<TechnicianRequest> CheckAlreadyRequested(string userid)
+        {
             var sql = "select * from TechnicianRequests where userid=@userid";
             using var connection = context.CreateConnection();
             return await connection.QueryFirstOrDefaultAsync<TechnicianRequest>(sql, new { userid = userid });
@@ -41,41 +45,40 @@ namespace MobileMend.Infrastructure.Repositories
         public async Task<IEnumerable<TechnicianRequest>> GetRequests(TechnicianRequestStatuses? status, string? search)
         {
             var sql = @"SELECT 
-    t.TechnicianRequestID,
-    t.UserID,
-    t.Experience,
-    t.ResumeUrl,
-    u.Email AS Email,
-    u.Name,
-    u.Phone AS Phone,
-    t.Specialization,
-    t.Bio,
-    t.Status,
-    t.Place,
-    t.AdminRemark,
-    t.Longitude,
-    t.Latitude,
-    t.RequestDate
-FROM TechnicianRequests t
-JOIN Users u ON u.UserID = t.UserID
-WHERE (@Status IS NULL OR t.Status = @Status)
-  AND (@Search IS NULL OR 
-       u.Name LIKE CONCAT('%', @Search, '%') OR 
-       u.Email LIKE CONCAT('%', @Search, '%') OR 
-       u.Phone LIKE CONCAT('%', @Search, '%') OR 
-       t.Specialization LIKE CONCAT('%', @Search, '%') OR
-       t.Place LIKE CONCAT('%', @Search, '%'))
-ORDER BY t.RequestDate DESC;
+        t.TechnicianRequestID,
+        t.UserID,
+        t.Experience,
+        d.Data AS DocumentData,
+        u.Email AS Email,
+        u.Name,
+        u.Phone AS Phone,
+        t.Specialization,
+        t.Bio,
+        t.Status,
+        t.Place,
+        t.AdminRemark,
+        t.Longitude,
+        t.Latitude,
+        t.RequestDate
+    FROM TechnicianRequests t
+    LEFT JOIN Documents d ON d.DocumentId = t.DocumentId
+    JOIN Users u ON u.UserID = t.UserID
+    WHERE (@Status IS NULL OR t.Status = @Status)
+      AND (@Search IS NULL OR 
+           u.Name LIKE CONCAT('%', @Search, '%') OR 
+           u.Email LIKE CONCAT('%', @Search, '%') OR 
+           u.Phone LIKE CONCAT('%', @Search, '%') OR 
+           t.Specialization LIKE CONCAT('%', @Search, '%') OR
+           t.Place LIKE CONCAT('%', @Search, '%'))
+    ORDER BY t.RequestDate DESC;";
 
-
-
-";
             using var connection = context.CreateConnection();
             return await connection.QueryAsync<TechnicianRequest>(
                 sql,
-                new { Status = status.HasValue ? status.ToString() : null,Search= search }
+                new { Status = status.HasValue ? status.ToString() : null, Search = search }
             );
         }
+
 
 
         public async Task<int> AddTechnician(Guid technicianRequestId)
@@ -85,13 +88,16 @@ ORDER BY t.RequestDate DESC;
             var updateRoleQuery = "update Users set Role='Technician' where UserID=(select UserID from TechnicianRequests where TechnicianRequestID=@TechnicianRequestID)";
             using var connection = context.CreateConnection();
             connection.Open();
-            using var transaction= connection.BeginTransaction();
-            try {
+            using var transaction = connection.BeginTransaction();
+            try
+            {
                 await connection.ExecuteAsync(sql, new { TechnicianRequestID = technicianRequestId }, transaction);
                 var rowsaffected = await connection.ExecuteAsync(updateRoleQuery, new { TechnicianRequestID = technicianRequestId }, transaction);
                 transaction.Commit();
                 return rowsaffected;
-            } catch (Exception ex) { 
+            }
+            catch (Exception ex)
+            {
                 transaction.Rollback();
                 throw;
             }
@@ -99,7 +105,8 @@ ORDER BY t.RequestDate DESC;
 
         }
 
-        public async Task<int> UpdateRoleToTechnician(Guid userid) {
+        public async Task<int> UpdateRoleToTechnician(Guid userid)
+        {
             var sql = "update Users set Role='Technician' where UserID=@UserId";
             using var connection = context.CreateConnection();
             var rowsaffected = await connection.ExecuteAsync(sql, new { UserId = userid });
@@ -117,8 +124,10 @@ ORDER BY t.RequestDate DESC;
             connection.Open();
             using var transaction = connection.BeginTransaction();
 
-            try {
-                if (statusdata.Status) {
+            try
+            {
+                if (statusdata.Status)
+                {
                     await connection.ExecuteAsync(updatePendingJobsQuery, new { TechnicianID = TechnicianID }, transaction);
                 }
 
@@ -131,7 +140,9 @@ ORDER BY t.RequestDate DESC;
                 transaction.Commit();
                 return rowsaffected;
 
-            } catch (Exception ex) {
+            }
+            catch (Exception ex)
+            {
 
                 transaction.Rollback();
                 throw;
@@ -157,8 +168,10 @@ ORDER BY t.RequestDate DESC;
             using var connection = context.CreateConnection();
             connection.Open();
             using var transaction = connection.BeginTransaction();
-            try {
-                if (status.ToString() == "Completed") {
+            try
+            {
+                if (status.ToString() == "Completed")
+                {
                     await connection.ExecuteAsync(jobCountUpdateQuery, new { TechnicianID = technicianId }, transaction);
                 }
 
@@ -167,7 +180,8 @@ ORDER BY t.RequestDate DESC;
                 transaction.Commit();
                 return rowsaffected;
             }
-            catch (Exception ex) {
+            catch (Exception ex)
+            {
                 transaction.Rollback();
                 throw;
             }
@@ -175,18 +189,20 @@ ORDER BY t.RequestDate DESC;
         }
 
 
-        public async Task<int> UpdateAvailability(Guid technicianID, UpdateAvailablityDTO status) {
+        public async Task<int> UpdateAvailability(Guid technicianID, UpdateAvailablityDTO status)
+        {
             Console.WriteLine(status);
             var sql = "update Technicians set IsAvailable=@Status where technicianid=@TechnicianID";
             using var connection = context.CreateConnection();
-            var rowsaffected = await connection.ExecuteAsync(sql, new {Status=status.TechnicianAvailabilityStatus.ToString(),TechnicianID= technicianID });
+            var rowsaffected = await connection.ExecuteAsync(sql, new { Status = status.TechnicianAvailabilityStatus.ToString(), TechnicianID = technicianID });
             return rowsaffected;
         }
 
 
-        public async Task<IEnumerable<TechnicianDTO>> GetBestTechnician(Guid customerAddressId,Guid deviceId) {
+        public async Task<IEnumerable<TechnicianDTO>> GetBestTechnician(Guid customerAddressId, Guid deviceId)
+        {
 
-          
+
 
             var sql = @"SELECT 
                                 TechnicianID,
@@ -229,7 +245,7 @@ ORDER BY t.RequestDate DESC;
                             LIMIT 5;";
 
             using var connection = context.CreateConnection();
-            return await connection.QueryAsync<TechnicianDTO>(sql, new { CustomerAddressId= customerAddressId, DeviceId= deviceId });
+            return await connection.QueryAsync<TechnicianDTO>(sql, new { CustomerAddressId = customerAddressId, DeviceId = deviceId });
         }
 
 
@@ -284,22 +300,25 @@ ORDER BY t.RequestDate DESC;
 
 
 
-        public async Task<Guid> GetTechnicianIdByUserId(string Userid) {
+        public async Task<Guid> GetTechnicianIdByUserId(string Userid)
+        {
             var sql = "select TechnicianID from Technicians where userid=@UserId";
             using var connection = context.CreateConnection();
             return await connection.QueryFirstOrDefaultAsync<Guid>(sql, new { UserId = Userid });
         }
 
 
-        public async Task<int> UpdateCurrentLocation(UpdateCurrentLocationDTO currentLocation) {
+        public async Task<int> UpdateCurrentLocation(UpdateCurrentLocationDTO currentLocation)
+        {
             var sql = "update Technicians set CurrentLatitude=@Latitude ,CurrentLongitude=@Longitude,LastLocationUpdated=NOW() where technicianid=@TechnicianID";
             using var connection = context.CreateConnection();
-            var rowsaffected = await connection.ExecuteAsync(sql, new { Latitude=currentLocation.Latitude,Longitude=currentLocation.Longitude,TechnicianID=currentLocation.TechnicianId });
+            var rowsaffected = await connection.ExecuteAsync(sql, new { Latitude = currentLocation.Latitude, Longitude = currentLocation.Longitude, TechnicianID = currentLocation.TechnicianId });
             return rowsaffected;
         }
 
 
-        public async Task<IEnumerable<GetTechnicianByAdminDTO>> GetTechnicians(TechnicianFilterDTO filter) {
+        public async Task<IEnumerable<GetTechnicianByAdminDTO>> GetTechnicians(TechnicianFilterDTO filter)
+        {
             var sql = @"SELECT 
     t.TechnicianId,
     u.Name,
@@ -351,7 +370,7 @@ WHERE
 
             using var connection = context.CreateConnection();
             var rowsAffected = await connection.ExecuteAsync(sql, new { TechnicianId = technicianId });
-            return rowsAffected ;
+            return rowsAffected;
         }
 
 
@@ -360,7 +379,7 @@ WHERE
         {
             using var connection = context.CreateConnection();
             connection.Open();
-            using var transaction= connection.BeginTransaction();
+            using var transaction = connection.BeginTransaction();
             try
             {
                 var totalRevenueQuery = @"
@@ -370,8 +389,9 @@ WHERE
                 ;
 
                 var totalRevenue = await connection.QueryFirstOrDefaultAsync<double?>(totalRevenueQuery, new { TechnicianId = technicianId }, transaction);
-                if (totalRevenue == null) { 
-                    totalRevenue=0;
+                if (totalRevenue == null)
+                {
+                    totalRevenue = 0;
                 }
                 var assignedQuery = @"
                         SELECT COUNT(*) 
@@ -413,7 +433,7 @@ WHERE
             catch (Exception)
             {
                 transaction.Rollback();
-                throw; 
+                throw;
             }
         }
 
@@ -433,12 +453,13 @@ WHERE
             ;
             using var connection = context.CreateConnection();
 
-            var chartData = await connection.QueryAsync<TechnicianRevenueChartDataDTO>(sql, new { TechnicianId =technicianId});
+            var chartData = await connection.QueryAsync<TechnicianRevenueChartDataDTO>(sql, new { TechnicianId = technicianId });
 
             return chartData;
         }
 
-        public async Task<Guid> ReassignTechnician(Guid bookingId) {
+        public async Task<Guid> ReassignTechnician(Guid bookingId)
+        {
 
             var alreadyAssignedTechniciansQuery = @"select TechnicianID from ServiceRequestActions WHERE BookingID=@BookingId";
             var bookingDetailQuery = @"select DeviceId,AddressId from Bookings where BookingId=@BookingId";
@@ -446,23 +467,36 @@ WHERE
             using var connection = context.CreateConnection();
             connection.Open();
             using var transaction = connection.BeginTransaction();
-            try {
+            try
+            {
                 IEnumerable<Guid>? alreadyAssigned = await connection.QueryAsync<Guid>(alreadyAssignedTechniciansQuery, new { BookingId = bookingId });
                 var bookindDetailForReaasignment = await connection.QueryFirstOrDefaultAsync<BookingReassignmentDataDTO>(bookingDetailQuery, new { BookingId = bookingId });
-                TechnicianAssignmentResult newTechnician=await FindTechnician(bookindDetailForReaasignment.AddressId, bookindDetailForReaasignment.DeviceId, alreadyAssigned);
+                TechnicianAssignmentResult newTechnician = await FindTechnician(bookindDetailForReaasignment.AddressId, bookindDetailForReaasignment.DeviceId, alreadyAssigned);
                 if (newTechnician == null)
                 {
                     transaction.Rollback();
                     throw new InvalidOperationException("No available technician found for reassignment.");
                 }
-                await connection.ExecuteAsync(updateBookingQuery, new { TechnicianId=newTechnician.TechnicianID, BookingID= bookingId });
+                await connection.ExecuteAsync(updateBookingQuery, new { TechnicianId = newTechnician.TechnicianID, BookingID = bookingId });
                 transaction.Commit();
                 return newTechnician.TechnicianID;
-            } catch (Exception) { 
+            }
+            catch (Exception)
+            {
                 transaction.Rollback();
                 throw;
             }
 
+        }
+
+
+        public async Task<int> UploadDocument(Domain.Entities.Document documentData)
+        {
+            var sql = @"insert into Documents (DocumentId,Name,MimeType,Data) values (@DocumentId,@Name,@MimeType,@Data)";
+
+            using var connection = context.CreateConnection();
+            var rowsAffected = await connection.ExecuteAsync(sql, new { DocumentId = documentData.DocumentId, Name= documentData.Name, MimeType= documentData.MimeType, Data= documentData.Data });
+            return rowsAffected;
         }
 
 

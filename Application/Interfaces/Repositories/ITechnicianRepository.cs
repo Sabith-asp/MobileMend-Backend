@@ -41,5 +41,7 @@ namespace MobileMend.Application.Interfaces.Repositories
         Task<IEnumerable<TechnicianRevenueChartDataDTO>> GetMonthlyRevenueAndBookings(Guid technicianId);
 
         Task<Guid> ReassignTechnician(Guid bookingId);
+
+        Task<int> UploadDocument(Domain.Entities.Document documentData);
     }
 }
