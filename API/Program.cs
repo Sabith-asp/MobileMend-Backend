@@ -19,7 +19,7 @@ using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
-Env.Load("../");
+Env.Load();
 
 builder.Configuration["ConnectionStrings:ConnStr"] =
     Environment.GetEnvironmentVariable("DB_CONNECTION");
