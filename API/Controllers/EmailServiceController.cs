@@ -13,7 +13,6 @@ namespace API.Controllers
         public EmailServiceController(IEmailService _emailService) {
             emailService = _emailService;
         }
-        [Authorize(Roles = "User")]
 
         [HttpGet("confirm")]
         public async Task<IActionResult> ConfirmEmail(string email, string token)

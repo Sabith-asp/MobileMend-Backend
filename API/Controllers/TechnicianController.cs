@@ -47,6 +47,7 @@ namespace MobileMend.API.Controllers
         [HttpPost("technician-request")]
         public async Task<IActionResult> TechnicianRequest([FromForm]TechnicianRequestCreateDTO newrequest)
         {
+
             var response = await technicianService.TechnicianRequest(UserId,newrequest);
             return StatusCode(response.StatusCode, response);
         }

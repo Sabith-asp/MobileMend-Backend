@@ -15,7 +15,7 @@ namespace Application.DTOs
 
         public int Experience { get; set; }
 
-        public string Resume { get; set; }
+        public Guid DocumentId { get; set; }
 
         public string Specialization { get; set; }
 

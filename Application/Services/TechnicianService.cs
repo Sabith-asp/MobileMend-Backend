@@ -1,8 +1,10 @@
-﻿using Application.DTOs;
+﻿using System.Reflection.Metadata;
+using Application.DTOs;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Services;
 using Application.Services;
 using AutoMapper;
+using Domain.Entities;
 using Domain.Enums;
 using Microsoft.AspNetCore.Mvc;
 using MobileMend.Application.DTOs;
@@ -29,17 +31,40 @@ namespace MobileMend.Application.Services
         public async Task<ResponseDTO<object>> TechnicianRequest(string userId, TechnicianRequestCreateDTO newrequest) {
             try
             {
+                if (newrequest.Resume == null || newrequest.Resume.Length == 0)
+                    return new ResponseDTO<object> { StatusCode = 400, Message = "File Not Selected" };
+
+
                 
+
                 var alreadyRequested = await technicianRepository.CheckAlreadyRequested(userId);
                 if (alreadyRequested != null) {
                     return new ResponseDTO<object> { StatusCode = 400, Message = "Already requested" };
                 }
-                var url = await cloudinaryService.UploadDocumentAsync(newrequest.Resume, "documents");
-                Console.WriteLine(url);
-                var data=mapper.Map<TechncianRequestAddDTO>(newrequest);
+
+                using var memoryStream = new MemoryStream();
+                await newrequest.Resume.CopyToAsync(memoryStream);
+                Guid docId= Guid.NewGuid();
+                var document = new Domain.Entities.Document
+                {
+                    DocumentId = docId,
+                    Name = newrequest.Resume.FileName,
+                    MimeType = newrequest.Resume.ContentType,
+                    Data = memoryStream.ToArray(),
+                    CreatedAt = DateTime.UtcNow
+                };
+
+                var documentUploaded = await technicianRepository.UploadDocument(document);
+                if (documentUploaded < 1)
+                {
+                    return new ResponseDTO<object> { StatusCode = 400, Message = "Error in uploading document" };
+                }
+                //var url = await cloudinaryService.UploadDocumentAsync(newrequest.Resume, "documents");
+                //Console.WriteLine(url);
+                var data = mapper.Map<TechncianRequestAddDTO>(newrequest);
                 data.UserID = userId;
-                data.Resume = url;
-                var result=await technicianRepository.TechnicianRequest(data);
+                data.DocumentId = docId;
+                var result =await technicianRepository.TechnicianRequest(data);
                 if (result < 1) { 
                  return new ResponseDTO<object> { StatusCode = 400, Message = "Error in technician request" };
                 }
@@ -78,25 +103,25 @@ namespace MobileMend.Application.Services
         {
             try
             {
-
                 if (string.IsNullOrWhiteSpace(search))
                 {
                     search = null;
                 }
 
-                var result = await technicianRepository.GetRequests(status,search);
-                if (result == null || !result.Any()) {
-                    return new ResponseDTO<IEnumerable<object>>{ StatusCode=404,Message=$"requests not found"};
+                var result = await technicianRepository.GetRequests(status, search);
+                if (result == null || !result.Any())
+                {
+                    return new ResponseDTO<IEnumerable<object>> { StatusCode = 404, Message = "Requests not found" };
                 }
-              
-                return new ResponseDTO<IEnumerable<object>> { StatusCode = 200, Message = $"requests retrieved",Data=result };
+
+                return new ResponseDTO<IEnumerable<object>> { StatusCode = 200, Message = "Requests retrieved", Data = result };
             }
             catch (Exception ex)
             {
                 return new ResponseDTO<IEnumerable<object>> { StatusCode = 500, Error = ex.Message };
-
             }
         }
+
 
 
         public async Task<ResponseDTO<object>> UpdateServiceRequest(UpdateServiceRequestDTO statusdata)
