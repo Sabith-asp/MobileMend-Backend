@@ -39,6 +39,8 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddAutoMapper(typeof(MapperProfile));
 builder.Services.AddSingleton<DapperContext>();
 builder.Services.AddScoped<JWTGenerator>();
+builder.Services.AddScoped<ISpareService, SpareService>();
+builder.Services.AddScoped<ISpareRepository, SpareRepository>();
 builder.Services.AddScoped<IAuthService,AuthService>();
 builder.Services.AddScoped<IAuthRepository, AuthRepository>();
 builder.Services.AddScoped<IServiceService,ServiceService>();
@@ -53,8 +55,6 @@ builder.Services.AddScoped<IBookingRepository, BookingRepository>();
 builder.Services.AddScoped<IBookingService, BookingService>();
 builder.Services.AddScoped<IRatingService, RatingService>();
 builder.Services.AddScoped<IRatingRepository, RatingRepository>();
-builder.Services.AddScoped<ISpareService, SpareService>();
-builder.Services.AddScoped<ISpareRepository, SpareRepository>();
 builder.Services.AddScoped<IAdminService, AdminService>();
 builder.Services.AddScoped<IAdminRepository, AdminRepository>();
 builder.Services.AddScoped<IEmailService, EmailService>();
@@ -193,7 +193,7 @@ builder.Services.AddAuthorization(options =>
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+if (app.Environment.IsDevelopment() || app.Environment.IsProduction())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
