@@ -1493,6 +1493,12 @@
       }
     },
     "securitySchemes": {
+      "Bearer": {
+        "type": "apiKey",
+        "description": "JWT Authorization header using the Bearer scheme. Example: \"Authorization: Bearer {token}\"",
+        "name": "Authorization",
+        "in": "header"
+      },
       "cookieAuth": {
         "type": "apiKey",
         "description": "JWT token stored in the 'accessToken' cookie",
@@ -1503,6 +1509,7 @@
   },
   "security": [
     {
+      "Bearer": [ ],
       "cookieAuth": [ ]
     }
   ]

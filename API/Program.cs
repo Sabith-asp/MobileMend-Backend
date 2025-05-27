@@ -19,7 +19,7 @@ using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
-Env.Load();
+Env.Load("../");
 
 builder.Configuration["ConnectionStrings:ConnStr"] =
     Environment.GetEnvironmentVariable("DB_CONNECTION");
@@ -66,51 +66,36 @@ builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowSpecificOrigin",
-        policy =>
-        {
-            policy.AllowAnyOrigin()
-                  .AllowAnyMethod()
-                  .AllowAnyHeader();
-        });
+    options.AddPolicy("AllowAll", policy =>
+    {
+        policy
+            .SetIsOriginAllowed(_ => true) // Allow all origins
+            .AllowAnyMethod()
+            .AllowAnyHeader()
+            .AllowCredentials(); // Optional: only if you're using cookies
+    });
 });
 
-builder.Services.AddEndpointsApiExplorer();
-//builder.Services.AddSwaggerGen(c =>
-//{
-//    c.SwaggerDoc("v1", new OpenApiInfo { Title = "MobileMend API", Version = "v1" });
-//    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
-//    {
-//        Name = "Authorization",
-//        Type = SecuritySchemeType.Http,
-//        Scheme = "Bearer",
-//        BearerFormat = "JWT",
-//        In = ParameterLocation.Header,
-//        Description = "Enter 'Bearer {your token}' in the field below."
-//    });
 
-//    c.AddSecurityRequirement(new OpenApiSecurityRequirement
-//    {
-//        {
-//            new OpenApiSecurityScheme
-//            {
-//                Reference = new OpenApiReference
-//                {
-//                    Type = ReferenceType.SecurityScheme,
-//                    Id = "Bearer"
-//                }
-//            },
-//            new string[] {}
-//        }
-//    });
-//});
+builder.Services.AddEndpointsApiExplorer();
+
 
 
 builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "MobileMend API", Version = "v1" });
 
-    // This part allows Swagger to recognize JWT in cookies
+    // 1. Bearer token in Authorization header (for Postman, Flutter, etc.)
+    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Description = "JWT Authorization header using the Bearer scheme. Example: \"Authorization: Bearer {token}\"",
+        Name = "Authorization",
+        In = ParameterLocation.Header,
+        Type = SecuritySchemeType.ApiKey,
+        Scheme = "Bearer"
+    });
+
+    // 2. Cookie-based token (for browser sessions)
     c.AddSecurityDefinition("cookieAuth", new OpenApiSecurityScheme
     {
         Name = "accessToken",
@@ -119,6 +104,7 @@ builder.Services.AddSwaggerGen(c =>
         Description = "JWT token stored in the 'accessToken' cookie"
     });
 
+    // Enable both in security requirement
     c.AddSecurityRequirement(new OpenApiSecurityRequirement
     {
         {
@@ -126,8 +112,19 @@ builder.Services.AddSwaggerGen(c =>
             {
                 Reference = new OpenApiReference
                 {
-                    Id = "cookieAuth",
-                    Type = ReferenceType.SecurityScheme
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            Array.Empty<string>()
+        },
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "cookieAuth"
                 }
             },
             Array.Empty<string>()
@@ -138,20 +135,9 @@ builder.Services.AddSwaggerGen(c =>
 
 
 
+
 var key = Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]);
-//builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-//    .AddJwtBearer(options =>
-//    {
-//        options.TokenValidationParameters = new TokenValidationParameters
-//        {
-//            ValidateIssuer = false,
-//            ValidateAudience = false,
-//            ValidateLifetime = true,
-//            ValidateIssuerSigningKey = true,
-//            ClockSkew = TimeSpan.Zero,
-//            IssuerSigningKey = new SymmetricSecurityKey(key)
-//        };
-//    });
+
 
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -161,24 +147,34 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         {
             OnMessageReceived = context =>
             {
-                if (context.Request.Cookies.ContainsKey("accessToken"))
+                // 1. Check Authorization header
+                var authHeader = context.Request.Headers["Authorization"].FirstOrDefault();
+                if (!string.IsNullOrEmpty(authHeader) && authHeader.StartsWith("Bearer "))
+                {
+                    context.Token = authHeader["Bearer ".Length..]; // Get token after "Bearer "
+                }
+
+                // 2. Fallback to cookie if Authorization header is not present
+                if (string.IsNullOrEmpty(context.Token) && context.Request.Cookies.ContainsKey("accessToken"))
                 {
                     context.Token = context.Request.Cookies["accessToken"];
                 }
+
                 return Task.CompletedTask;
             }
         };
 
         options.TokenValidationParameters = new TokenValidationParameters
         {
-            ValidateIssuer = false,
-            ValidateAudience = false,
+            ValidateIssuer = false, // set to true and configure if you have issuer
+            ValidateAudience = false, // set to true and configure if you have audience
             ValidateLifetime = true,
             ValidateIssuerSigningKey = true,
-            ClockSkew = TimeSpan.Zero,
+            ClockSkew = TimeSpan.Zero, // no token time leeway
             IssuerSigningKey = new SymmetricSecurityKey(key)
         };
     });
+
 
 
 
@@ -199,7 +195,7 @@ if (app.Environment.IsDevelopment() || app.Environment.IsProduction())
 }
 
 app.UseHttpsRedirection();
-app.UseCors("AllowSpecificOrigin");
+app.UseCors("AllowAll");
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapHub<NotificationHub>("/notificationHub");
